@@ -11,6 +11,6 @@ Eesha: Designer and frontend developper
 <br/>
 Houda: Frontend developper
 <br/>
-Nicole: Designer
+Nicole: Designer and Frontend developer
 <br/>
-Edwin: Project manager
+Edwin: Project manager and backend developper
