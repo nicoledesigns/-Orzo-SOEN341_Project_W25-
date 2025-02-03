@@ -14,3 +14,34 @@ Houda: Frontend developper
 Nicole: Designer and Frontend developer
 <br/>
 Edwin: Project manager and backend developper
+
+## Features  
+
+### Baseline Features  
+- **Text Channels for Group Communication**  
+  - Users can join channels. 
+  - Messages sent in a channel are visible to all users in that channel.  
+
+- **Direct Messaging Between Users**  
+  - Users can message other users directly.  
+  - Conversations via direc message are private and can only be seen by the participants.  
+
+- **Role-Based User Permissions**  
+  - Two roles: **Admin** and **Member**.  
+  - **Admins** can:
+    - Create/delete channels.  
+  - **Members** can:
+    - Send and view messages within allowed channels.  
+
+---
+
+## Technologies Used
+
+- **Frontend**: React.js  
+- **Backend**: Node.js with Express.js
+- **Database**: SQLite
+
+---
+
+## Installation  
+
