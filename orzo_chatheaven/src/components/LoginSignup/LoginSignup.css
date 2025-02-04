@@ -101,3 +101,43 @@
     background: #eaeaea;
     color: #797979;
 }
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+/* Container for the form */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+  }
+  
+  /* Styling for the header */
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+
+/* Styling for the submit button */
+.submit-btn {
+    background-color: rgb(36, 129, 24);
+    color: white;
+    padding: 10px 0px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 15px; /* Rounded edges */
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .submit-btn:hover {
+    background-color: #195c1e; /* Darker pink on hover */
+  }
