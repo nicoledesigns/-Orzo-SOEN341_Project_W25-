@@ -10,19 +10,30 @@ const LoginSignup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [role, setRole] = useState('');
 
   const handleSubmit = () => {
+    // Validate email format
     if (!name || !email || !password) {
       alert('Please fill out all fields');
+    } else if (!isValidEmail(email)) {
+      setEmailError('Please enter a valid email (e.g., example123@gmail.com)');
     } else if (password.length < 6) {
       setPasswordError('Password must be at least 6 characters long');
     } else if (!role) {
       alert('Please select a role');
     } else {
       setPasswordError('');
+      setEmailError('');
       alert(`Form submitted as ${role}`);
     }
+  };
+
+  const isValidEmail = (email) => {
+    // Regular expression for email validation
+    const regex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,6}$/;
+    return regex.test(email);
   };
 
   const handleRoleChange = (selectedRole) => {
@@ -57,6 +68,8 @@ const LoginSignup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {/* Display Email Error */}
+          {emailError && <div className='error-message'>{emailError}</div>}
         </div>
         <div className='input'>
           <img src={password_icon} alt='' />
