@@ -1,6 +1,7 @@
 const cors = require('cors');
 const express = require('express');
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const http = require('http');       // Node.js built-in HTTP module
 const url = require('url');         // URL parsing module
 const mysql = require('mysql2');    // MySQL database connection
@@ -169,6 +170,8 @@ const handleAssignUser = (req, res) => {
         }
     });
 };
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
