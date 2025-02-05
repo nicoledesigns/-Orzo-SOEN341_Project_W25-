@@ -5,6 +5,8 @@
     margin-top: 200px;
     background: #fff;
     padding-bottom: 30px;
+    position: relative; 
+    z-index:1;
 }
 
 .header{
@@ -17,7 +19,7 @@
 }
 
 .text{
-    color: #E195AB;
+    color: blue;
     font-size: 48px;
     font-weight: 700;
 }
@@ -25,7 +27,7 @@
 .underline{
     width: 61px;
     height: 6px;
-    background: #E195AB;
+    background: blue;
     border-radius: 9px;
 }
 
@@ -73,7 +75,7 @@
 }
 
 .forgot-password span{
-    color: #E195AB;
+    color: blue;
     cursor: pointer;
 }
 
@@ -90,7 +92,7 @@
     width: 220px;
     height: 59px;
     color: #fff;
-    background: #E195AB;
+    background: blue;
     border-radius: 50px;
     font-size: 19px;
     font-weight: 700;
@@ -166,14 +168,14 @@
     width: 20px;
     height: 20px;
     background: #fff;
-    border: 2px solid #E195AB;
+    border: 2px solid blue;
     border-radius: 4px;
     cursor: pointer;
     position: relative;
   }
   
   .role-selection input[type="checkbox"]:checked {
-    background: #E195AB;
+    background: blue;
   }
   
   .role-selection input[type="checkbox"]:checked::after {
@@ -185,3 +187,38 @@
     color: #fff;
     font-size: 14px;
   }
+
+  
+  .bubbles{
+      position: relative;
+      display: flex;
+      z-index:-1;
+  }
+  
+  .bubbles span{
+      position: relative;
+      width: 30px;
+      height: 30px;
+      background: rgba(0, 76, 255, 0.707);
+      margin: 0 4px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 10px rgba(0, 102, 255, 0.307),
+      0 0 50px rgba(0, 42, 255, 0.707),
+      0 0 100px rgba(0, 42, 255, 0.707);
+      animation: animate 15s linear infinite;
+      animation-duration: calc(125s /var(--i)) ;
+  } 
+  .bubbles span:nth-child(even) {
+      background: #4fc3dc;
+      box-shadow: 0 0 0 10px #4fc3dc44,
+      0 0 50px #4fc3dc,
+      0 0 100px #4fc3dc;
+  }
+  @keyframes animate{
+      0%{
+          transform:translateY(100vh) scale(0);
+      }
+      100%{
+          transform:translateY(-10vh) scale(1);
+      }
+  }   
