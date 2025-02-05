@@ -1,8 +1,19 @@
+<<<<<<< Updated upstream
 import React, { useState } from 'react';
 import './LoginSignup.css';
 import user_icon from '../Assets/person.png';
 import email_icon from '../Assets/email.png';
 import password_icon from '../Assets/password.png';
+=======
+import React, { useState } from 'react'
+import './LoginSignup.css'
+import user_icon from '../Assets/person.png'
+import email_icon from '../Assets/email.png'
+import password_icon from '../Assets/password.png'
+import axios from "axios";
+
+
+>>>>>>> Stashed changes
 
 const LoginSignup = () => {
   const [action, setAction] = useState('Sign Up');
@@ -40,6 +51,37 @@ const LoginSignup = () => {
     setRole(selectedRole);
   };
 
+<<<<<<< Updated upstream
+=======
+  const [action, setAction]=useState("Sign Up")
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+    // Handle input changes
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+    
+      // Handle form submission
+      const handleSubmit = async () => {
+        const endpoint = action === "Sign Up" ? "/signup" : "/login";
+        
+        try {
+          const response = await axios.post(`http://localhost:3001${endpoint}`, formData);
+          alert(response.data.message); // Show success message
+    
+          if (action === "Login") {
+            localStorage.setItem("token", response.data.token); // Store token in localStorage
+          }
+        } catch (error) {
+          alert(error.response?.data?.message || "An error occurred.");
+        }
+      };
+      
+>>>>>>> Stashed changes
   return (
     <div className='container'>
         <div className="bubbles">
