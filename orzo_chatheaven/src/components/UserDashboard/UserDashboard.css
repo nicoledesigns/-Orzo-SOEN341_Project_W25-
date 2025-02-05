@@ -1,0 +1,130 @@
+.user-dashboard {
+    display: flex;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #5371ff;
+  }
+  
+  
+  .sidebar {
+    width: 20%;
+    background-color: white;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+  }
+  
+  .chathaven-title {
+    text-align: center;
+    font-size: 24px;
+    color: #5371ff; 
+    margin-bottom: 20px;
+  }
+  
+  .sidebar h3 {
+    margin-bottom: 15px;
+    color: #5371ff;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #e9e9e9;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sidebar li.active,
+  .sidebar li:hover {
+    background-color: #d4d4d4;
+  }
+  
+  /* Chat Section */
+  .chat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f9f9f9; 
+  }
+  
+  .chat-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .chat-header h3 {
+    margin: 0;
+    color: #5371ff;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ffffff;
+  }
+  
+  .message {
+    margin-bottom: 10px;
+  }
+  
+  .chat-input {
+    display: flex;
+    margin-top: 10px;
+  }
+  
+  .chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+  }
+  
+  .chat-input button {
+    padding: 10px 15px;
+    background-color: #5371ff;
+    border: none;
+    color: white;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+  }
+  
+
+  .profile-section {
+    width: 25%;
+    background-color: white;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+  }
+  
+  .profile-section h3 {
+    margin-bottom: 10px;
+    color: #5371ff;
+  }
+  
+  .profile-section p {
+    margin-bottom: 20px;
+  }
+  
+  .profile-section h4 {
+    margin-bottom: 10px;
+  }
+  
+  .profile-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .profile-section li {
+    padding: 5px 0;
+  }
+  

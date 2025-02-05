@@ -1,13 +1,18 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginSignup from './components/LoginSignup/LoginSignup';
-import React from 'react';
+import AdminDashboard from './components/AdminDashboard/AdminDashboard';
+import UserDashboard from './components/UserDashboard/UserDashboard';
 
 function App() {
   return (
-    <div>
-      <LoginSignup/>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginSignup />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/user-dashboard" element={<UserDashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
