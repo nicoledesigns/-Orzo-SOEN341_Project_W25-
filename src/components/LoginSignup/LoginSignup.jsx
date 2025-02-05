@@ -10,30 +10,19 @@ const LoginSignup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [emailError, setEmailError] = useState('');
   const [role, setRole] = useState('');
 
   const handleSubmit = () => {
-    // Validate email format
-    if (!name || !email || !password) {
+    if (!email || !password) {
       alert('Please fill out all fields');
-    } else if (!isValidEmail(email)) {
-      setEmailError('Please enter a valid email (e.g., example123@gmail.com)');
     } else if (password.length < 6) {
       setPasswordError('Password must be at least 6 characters long');
-    } else if (!role) {
+    } else if (action === 'Sign Up' && !role) {
       alert('Please select a role');
     } else {
       setPasswordError('');
-      setEmailError('');
-      alert(`Form submitted as ${role}`);
+      alert(action === 'Sign Up' ? `Form submitted as ${role}` : 'Logged in successfully');
     }
-  };
-
-  const isValidEmail = (email) => {
-    // Regular expression for email validation
-    const regex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
   };
 
   const handleRoleChange = (selectedRole) => {
@@ -42,48 +31,6 @@ const LoginSignup = () => {
 
   return (
     <div className='container'>
-        <div className="bubbles">
-      <span style={{ "--i":11}}></span>
-      <span style={{ "--i":12 }}></span>
-      <span style={{ "--i":24 }}></span>
-      <span style={{ "--i":10 }}></span>
-      <span style={{ "--i":14 }}></span>
-      <span style={{ "--i":23 }}></span>
-      <span style={{ "--i":18 }}></span>
-      <span style={{ "--i":16 }}></span>
-      <span style={{ "--i":19 }}></span>
-      <span style={{ "--i":20 }}></span>
-      <span style={{ "--i":22 }}></span>
-      <span style={{ "--i":25 }}></span>
-      <span style={{ "--i":18 }}></span>
-      <span style={{ "--i":21 }}></span>
-      <span style={{ "--i":15 }}></span>
-      <span style={{ "--i":13 }}></span>
-      <span style={{ "--i":26 }}></span>
-      <span style={{ "--i":17 }}></span>
-      <span style={{ "--i":13 }}></span>
-      <span style={{ "--i":28 }}></span>
-      <span style={{ "--i":11}}></span>
-      <span style={{ "--i":12 }}></span>
-      <span style={{ "--i":24 }}></span>
-      <span style={{ "--i":10 }}></span>
-      <span style={{ "--i":14 }}></span>
-      <span style={{ "--i":23 }}></span>
-      <span style={{ "--i":18 }}></span>
-      <span style={{ "--i":16 }}></span>
-      <span style={{ "--i":19 }}></span>
-      <span style={{ "--i":20 }}></span>
-      <span style={{ "--i":22 }}></span>
-      <span style={{ "--i":25 }}></span>
-      <span style={{ "--i":18 }}></span>
-      <span style={{ "--i":21 }}></span>
-      <span style={{ "--i":15 }}></span>
-      <span style={{ "--i":13 }}></span>
-      <span style={{ "--i":26 }}></span>
-      <span style={{ "--i":17 }}></span>
-      <span style={{ "--i":13 }}></span>
-      <span style={{ "--i":28 }}></span>
-    </div>
       <div className='header'>
         <div className='text'>{action}</div>
         <div className='underline'></div>
@@ -110,8 +57,6 @@ const LoginSignup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {/* Display Email Error */}
-          {emailError && <div className='error-message'>{emailError}</div>}
         </div>
         <div className='input'>
           <img src={password_icon} alt='' />
