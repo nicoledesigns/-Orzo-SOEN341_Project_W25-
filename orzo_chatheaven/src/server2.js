@@ -1,5 +1,6 @@
 const cors = require('cors');
 const express = require('express');
+<<<<<<< Updated upstream
 const http = require('http');       // Node.js built-in HTTP module
 const url = require('url');         // URL parsing module
 const mysql = require('mysql2');    // MySQL database connection
@@ -168,6 +169,8 @@ const handleAssignUser = (req, res) => {
         }
     });
 };
+=======
+>>>>>>> Stashed changes
 
 const app = express();
 app.use(cors());  // Enable CORS

@@ -11,6 +11,10 @@ import user_icon from '../Assets/person.png'
 import email_icon from '../Assets/email.png'
 import password_icon from '../Assets/password.png'
 import axios from "axios";
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 
 >>>>>>> Stashed changes
@@ -81,6 +85,9 @@ const LoginSignup = () => {
         }
       };
       
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   return (
     <div className='container'>
