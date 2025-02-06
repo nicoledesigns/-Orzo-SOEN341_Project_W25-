@@ -60,7 +60,6 @@ const LoginSignup = () => {
                 <button className="submit"
                     onClick={action === "Sign Up" ? handleSignUp : handleLogin}>
                         submit
-                    
                 </button>
 
             </div>
