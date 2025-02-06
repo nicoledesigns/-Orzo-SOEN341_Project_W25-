@@ -26,12 +26,87 @@ const LoginSignup = () => {
         .catch(err => console.log(err)); 
         console.log("shit")
     }
-    
   return (
     <div className='container'>
-        <div className='header'>
-            <div className='text'>{action}</div>
-            <div className='underline'></div>
+        <div className="bubbles">
+      <span style={{ "--i":11}}></span>
+      <span style={{ "--i":12 }}></span>
+      <span style={{ "--i":24 }}></span>
+      <span style={{ "--i":10 }}></span>
+      <span style={{ "--i":14 }}></span>
+      <span style={{ "--i":23 }}></span>
+      <span style={{ "--i":18 }}></span>
+      <span style={{ "--i":16 }}></span>
+      <span style={{ "--i":19 }}></span>
+      <span style={{ "--i":20 }}></span>
+      <span style={{ "--i":22 }}></span>
+      <span style={{ "--i":25 }}></span>
+      <span style={{ "--i":18 }}></span>
+      <span style={{ "--i":21 }}></span>
+      <span style={{ "--i":15 }}></span>
+      <span style={{ "--i":13 }}></span>
+      <span style={{ "--i":26 }}></span>
+      <span style={{ "--i":17 }}></span>
+      <span style={{ "--i":13 }}></span>
+      <span style={{ "--i":28 }}></span>
+      <span style={{ "--i":11}}></span>
+      <span style={{ "--i":12 }}></span>
+      <span style={{ "--i":24 }}></span>
+      <span style={{ "--i":10 }}></span>
+      <span style={{ "--i":14 }}></span>
+      <span style={{ "--i":23 }}></span>
+      <span style={{ "--i":18 }}></span>
+      <span style={{ "--i":16 }}></span>
+      <span style={{ "--i":19 }}></span>
+      <span style={{ "--i":20 }}></span>
+      <span style={{ "--i":22 }}></span>
+      <span style={{ "--i":25 }}></span>
+      <span style={{ "--i":18 }}></span>
+      <span style={{ "--i":21 }}></span>
+      <span style={{ "--i":15 }}></span>
+      <span style={{ "--i":13 }}></span>
+      <span style={{ "--i":26 }}></span>
+      <span style={{ "--i":17 }}></span>
+      <span style={{ "--i":13 }}></span>
+      <span style={{ "--i":28 }}></span>
+    </div>
+      <div className='header'>
+        <div className='text'>{action}</div>
+        <div className='underline'></div>
+      </div>
+      <div className='inputs'>
+        {action === 'Login' ? (
+          <div></div>
+        ) : (
+          <div className='input'>
+            <img src={user_icon} alt='' />
+            <input
+              type='text'
+              placeholder='Name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+        )}
+        <div className='input'>
+          <img src={email_icon} alt='' />
+          <input
+            type='email'
+            placeholder='E-mail'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {/* Display Email Error */}
+          {emailError && <div className='error-message'>{emailError}</div>}
+        </div>
+        <div className='input'>
+          <img src={password_icon} alt='' />
+          <input
+            type='password'
+            placeholder='Password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <div className='inputs'>
             {action==="Login"?<div></div>:
@@ -65,9 +140,9 @@ const LoginSignup = () => {
 
             </div>
         </div>
-      
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginSignup
+export default LoginSignup;
