@@ -1,7 +1,7 @@
 CREATE TABLE users(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    email TEXT NOT NULL, 
+    password TEXT NOT NULL, 
+    role TEXT NOT NULL
 )
--- this is just a test to be deleted later
-INSERT INTO users (name)
-VALUES("Karan")
