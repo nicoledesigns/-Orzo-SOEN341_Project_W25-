@@ -109,7 +109,7 @@ app.post("/signup", (req, res) => {
                     console.log("success");
                     return res.json({ message: "Login successful", user: row });
                 } else {
-                    console.log("failed log in");
+                    console.log("wrong password");
                     return res.status(401).json({ error: "Invalid credentials" });
                 }
             });
