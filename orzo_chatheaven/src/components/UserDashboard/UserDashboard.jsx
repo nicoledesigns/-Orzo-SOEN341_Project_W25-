@@ -1,9 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import "./UserDashboard.css";
 
 const UserDashboard = () => {
   const [channels] = useState(["General", "Developer Team", "Tester Team", "Design Team"]);
   const [selectedChannel, setSelectedChannel] = useState("General");
+
+  const navigate = useNavigate(); 
+
+  const handleLogout = () => {
+    sessionStorage.clear(); 
+    navigate("/"); 
+  };
 
   return (
     <div className="user-dashboard">
@@ -21,7 +29,11 @@ const UserDashboard = () => {
             </li>
           ))}
         </ul>
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
+
 
       <div className="chat-section">
         <div className="chat-header">
@@ -42,7 +54,7 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Profile/Info Section */}
+
       <div className="profile-section">
         <h3>{selectedChannel}</h3>
         <p>Description: This is your space to collaborate and discuss all things {selectedChannel}-related.</p>
