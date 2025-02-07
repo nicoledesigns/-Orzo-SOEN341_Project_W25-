@@ -1,6 +1,5 @@
 # Description 
-
-ChatHaven is a versatile communication platform designed for seamless interaction through text channels and direct messaging. Whether you’re collaborating with a team, connecting with a community, or chatting privately with friends, ChatHaven offers an intuitive and organized space to stay connected. Users can create topic-specific channels, share media, and engage in one-on-one conversations, all while enjoying customizable features that enhance the experience. With a clean interface and robust privacy options, ChatHaven is the perfect hub for meaningful and efficient communication.
+In today's digital world, finding a platform that facilitates both team collaboration and personal communication can be challenging. Many platforms are either too complex or fail to offer the right balance of privacy, customization, and ease of use. ChatHaven solves this by offering an easy-to-use platform where you can create channels, share media, and chat privately. It’s organized, customizable, and has strong privacy features, making it perfect for both group and one-on-one communication.
 
 # Roles
 Yassine: Backend developper
