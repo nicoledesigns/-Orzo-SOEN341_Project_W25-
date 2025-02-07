@@ -36,8 +36,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
 // })
 
 app.post("/signup", (req, res) => {
-    const { name, email, password } = req.body;
-    const role = "user";
+    const { name, email, password, role } = req.body; 
+    if (!name || !email || !password || !role) {
+        return res.status(400).json({ error: "All fields are required!" });
+    }
 
     bcrypt.genSalt(10, (err, salt) => {
         if (err) {
@@ -63,7 +65,6 @@ app.post("/signup", (req, res) => {
         });
     });
 });
-
     // app.post('/login', (req, res) => {
     //      const { email, password } = req.body; 
     //     console.log( email, password)
@@ -87,7 +88,12 @@ app.post("/signup", (req, res) => {
 
     app.post('/login', (req, res) => {
         const { email, password } = req.body;
-        const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)"; 
+    
+        if (!email || !password) {
+            return res.status(400).json({ error: "Email and password are required!" });
+        }
+    
+        const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)";
     
         db.get(sql, [email], (err, row) => {
             if (err) {
@@ -106,10 +112,19 @@ app.post("/signup", (req, res) => {
                 }
     
                 if (result) {
-                    console.log("success");
-                    return res.json({ message: "Login successful", user: row });
+                    console.log("Login successful:", row);
+                    // Send back only necessary user data
+                    return res.json({
+                        message: "Login successful",
+                        user: {
+                            id: row.id,
+                            name: row.name,
+                            email: row.email,
+                            role: row.role
+                        }
+                    });
                 } else {
-                    console.log("wrong password");
+                    console.log("Wrong password");
                     return res.status(401).json({ error: "Invalid credentials" });
                 }
             });

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [channels, setChannels] = useState(["General", "Developer Team", "Tester Team", "Design Team"]);
   const [newChannel, setNewChannel] = useState("");
   const [selectedChannel, setSelectedChannel] = useState("General");
+
+  const navigate = useNavigate(); 
 
   const handleAddChannel = () => {
     if (newChannel.trim() !== "") {
@@ -13,6 +16,11 @@ const AdminDashboard = () => {
     } else {
       alert("Channel name cannot be empty!");
     }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear(); 
+    navigate("/"); 
   };
 
   return (
@@ -40,6 +48,7 @@ const AdminDashboard = () => {
           />
           <button onClick={handleAddChannel}>Add</button>
         </div>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>
 
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import './LoginSignup.css';
 import user_icon from '../Assets/person.png';
 import email_icon from '../Assets/email.png';
@@ -10,21 +11,46 @@ const LoginSignup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [action, setAction] = useState('SignUp');
-    const [emailError, setEmailError] = useState(''); // Fixed emailError state
+    const [role, setRole] = useState('user'); 
+    const [emailError, setEmailError] = useState('');
+    
+    const navigate = useNavigate(); 
 
+    // Handle Signup
     const handleSignUp = (event) => {
-        event.preventDefault(); // Prevent page refresh
-        axios.post("http://localhost:8081/signup", { name, email, password })
-            .then(res => console.log("Signup Response:", res.data))
+        event.preventDefault();
+        axios.post("http://localhost:8081/signup", { name, email, password, role })
+            .then(res => {
+                console.log("Signup Response:", res.data);
+                alert("Signup successful! Please log in.");
+                setAction("Login");
+            })
             .catch(err => console.error("Signup Error:", err));
     };
 
+    // Handle Login
     const handleLogin = (event) => {
-        event.preventDefault(); 
-        axios.post('http://localhost:8081/login', { email, password })
-            .then(res => console.log("Login Response:", res.data))
-            .catch(err => console.log("Login Error:", err));
-    };
+      event.preventDefault();
+      axios.post('http://localhost:8081/login', { email, password })
+          .then(res => {
+              console.log("Login Response:", res.data);
+              
+              const userRole = res.data.user.role; 
+  
+              
+              if (userRole === "admin") {
+                  navigate('/admin-dashboard');
+              } else if (userRole === "user") {
+                  navigate('/user-dashboard');
+              } else {
+                  alert("Unknown role. Cannot redirect.");
+              }
+          })
+          .catch(err => {
+              console.log("Login Error:", err.response?.data || err);
+              alert(err.response?.data?.error || "Invalid credentials. Please try again.");
+          });
+  };
 
     return (
         <div className='container'>
@@ -64,7 +90,6 @@ const LoginSignup = () => {
                             }
                         }}
                     />
-                    {/* Display Email Error */}
                     {emailError && <div className='error-message'>{emailError}</div>}
                 </div>
                 <div className='input'>
@@ -75,6 +100,15 @@ const LoginSignup = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
+                </div>
+
+            
+                <div className='input'>
+                    <label>Role:</label>
+                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
                 </div>
 
                 {action === "Sign Up" ? null : (

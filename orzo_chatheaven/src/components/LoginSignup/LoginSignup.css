@@ -111,7 +111,7 @@
     text-align: center;
   }
 
-/* Container for the form */
+
 .container {
     display: flex;
     flex-direction: column;
@@ -120,14 +120,14 @@
     margin-top: 50px;
   }
   
-  /* Styling for the header */
+
   .header {
     text-align: center;
     margin-bottom: 20px;
   }
   
 
-/* Styling for the submit button */
+
 .submit-btn {
     background-color: rgb(36, 129, 24);
     color: white;
@@ -135,13 +135,13 @@
     text-align: center;
     width: 100%;
     margin-bottom: 20px;
-    border-radius: 15px; /* Rounded edges */
+    border-radius: 15px; 
     cursor: pointer;
     font-size: 16px;
   }
   
   .submit-btn:hover {
-    background-color: #195c1e; /* Darker pink on hover */
+    background-color: #195c1e;
   }
 
   .role-selection {
@@ -150,6 +150,8 @@
     gap: 20px;
     margin-top: 20px;
   }
+
+  
   
   .role-selection label {
     display: flex;
@@ -222,3 +224,24 @@
           transform:translateY(-10vh) scale(1);
       }
   }   
+
+  .input select {
+    width: 100%;
+    height: 100%;
+    padding: 15px; 
+    font-size: 19px; 
+    border: none; 
+    border-radius: 6px; 
+    background: transparent; 
+    color: #797979; 
+    outline: none; 
+    box-sizing: border-box; 
+}
+
+
+.input label {
+    margin-left: 20px;
+    margin-right: 10px;
+    font-size: 19px; 
+    color: black; 
+}
