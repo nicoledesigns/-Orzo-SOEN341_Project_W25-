@@ -36,6 +36,10 @@ const LoginSignup = () => {
               console.log("Login Response:", res.data);
               
               const userRole = res.data.user.role; 
+              const userName = res.data.user.name;
+
+              sessionStorage.setItem("userName", userName);
+              sessionStorage.setItem("userRole", userRole);
   
               
               if (userRole === "admin") {
