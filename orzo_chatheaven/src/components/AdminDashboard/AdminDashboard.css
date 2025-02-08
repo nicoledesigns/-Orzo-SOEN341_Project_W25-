@@ -155,3 +155,113 @@
   width: 100%;
 }
 
+.user-selection {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.user-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-checkbox input {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.user-checkbox label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.profile-section li span {
+  color: #5371ff;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.profile-section button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #5371ff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.profile-section button:hover {
+  background-color: #405bb5;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.add-channel button:hover,
+.chat-input button:hover {
+  background-color: #405bb5;
+}
+
+.sidebar li.active {
+  background-color: #5371ff;
+  color: white;
+}
+
+.sidebar li.active:hover {
+  background-color: #405bb5;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar,
+  .profile-section {
+    width: 100%;
+    border-right: none;
+    border-left: none;
+  }
+
+  .chat-section {
+    padding: 10px;
+  }
+
+  .add-channel {
+    flex-direction: column;
+  }
+
+  .add-channel input {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .add-channel button {
+    width: 100%;
+  }
+}
+
