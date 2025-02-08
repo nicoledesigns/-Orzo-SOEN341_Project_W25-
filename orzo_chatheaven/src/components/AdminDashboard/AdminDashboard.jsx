@@ -3,16 +3,47 @@ import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
-  const [channels, setChannels] = useState(["General", "Developer Team", "Tester Team", "Design Team"]);
+  const adminName = sessionStorage.getItem("userName") || "Admin";
+  const [channels, setChannels] = useState([
+    { name: "General", members: [adminName, "Bob", "Alice", "Eesha"] },
+    { name: "Developer Team", members: [adminName, "Bob", "Alice"] },
+    { name: "Tester Team", members: [adminName, "Eesha"] },
+    { name: "Design Team", members: [adminName, "Alice"] },
+  ]);
   const [newChannel, setNewChannel] = useState("");
   const [selectedChannel, setSelectedChannel] = useState("General");
+  const [users, setUsers] = useState(["Bob", "Alice", "Eesha", "Nicole", "Karan"]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const currentChannel = channels.find((channel) => channel.name === selectedChannel);
 
   const navigate = useNavigate(); 
 
+  const handleUserSelection = (user) => {
+    if (selectedUsers.includes(user)) {
+      setSelectedUsers(selectedUsers.filter((u) => u !== user));
+    } else {
+      setSelectedUsers([...selectedUsers, user]);
+    }
+  };
+
+  const handleAddUsersToChannel = () => {
+    const updatedChannels = channels.map((channel) => {
+      if (channel.name === selectedChannel) {
+        return {
+          ...channel,
+          members: [...new Set([...channel.members, ...selectedUsers])],
+        };
+      }
+      return channel;
+    });
+    setChannels(updatedChannels);
+    setSelectedUsers([]);
+  };
+
   const handleAddChannel = () => {
     if (newChannel.trim() !== "") {
-      setChannels([...channels, newChannel.trim()]);
-      setNewChannel(""); 
+      setChannels([...channels, { name: newChannel.trim(), members: [adminName] }]);
+      setNewChannel("");
     } else {
       alert("Channel name cannot be empty!");
     }
@@ -32,10 +63,10 @@ const AdminDashboard = () => {
           {channels.map((channel, index) => (
             <li
               key={index}
-              className={selectedChannel === channel ? "active" : ""}
-              onClick={() => setSelectedChannel(channel)}
+              className={selectedChannel === channel.name ? "active" : ""}
+              onClick={() => setSelectedChannel(channel.name)}
             >
-              #{channel}
+              #{channel.name}
             </li>
           ))}
         </ul>
@@ -55,7 +86,7 @@ const AdminDashboard = () => {
       <div className="chat-section">
         <div className="chat-header">
           <h3>#{selectedChannel}</h3>
-          <p>15 Members</p>
+          <p>{currentChannel.members.length} Members</p>
         </div>
         <div className="chat-messages">
           <div className="message">
@@ -77,13 +108,27 @@ const AdminDashboard = () => {
         <p>Description: This is your space to collaborate and discuss all things {selectedChannel}-related.</p>
         <h4>Members</h4>
         <ul>
-          <li>Houda</li>
-          <li>Eesha</li>
-          <li>Edwin</li>
-          <li>Yassine</li>
-          <li>Nicole</li>
-          <li>Karan</li>
+        {currentChannel.members.map((member, index) => (
+        <li key={index}>
+        {member} {member === adminName && <span>(Admin)</span>}
+        </li>
+        ))}
         </ul>
+        <h4>Add Users to Channel</h4>
+        <div className="user-selection">
+          {users.map((user, index) => (
+            <div key={index} className="user-checkbox">
+              <input
+                type="checkbox"
+                id={user}
+                checked={selectedUsers.includes(user)}
+                onChange={() => handleUserSelection(user)}
+              />
+              <label htmlFor={user}>{user}</label>
+            </div>
+          ))}
+        </div>
+        <button onClick={handleAddUsersToChannel}>Add Selected Users</button>
       </div>
     </div>
   );
