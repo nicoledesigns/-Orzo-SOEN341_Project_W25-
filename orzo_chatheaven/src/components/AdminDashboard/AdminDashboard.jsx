@@ -1,58 +1,103 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const adminName = sessionStorage.getItem("userName") || "Admin";
-  const [channels, setChannels] = useState([
-    { name: "General", members: [adminName, "Bob", "Alice", "Eesha"] },
-    { name: "Developer Team", members: [adminName, "Bob", "Alice"] },
-    { name: "Tester Team", members: [adminName, "Eesha"] },
-    { name: "Design Team", members: [adminName, "Alice"] },
-  ]);
+  const [channels, setChannels] = useState([]);
   const [newChannel, setNewChannel] = useState("");
-  const [selectedChannel, setSelectedChannel] = useState("General");
-  const [users, setUsers] = useState(["Bob", "Alice", "Eesha", "Nicole", "Karan"]);
+  const [selectedChannel, setSelectedChannel] = useState(null);
+  const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const currentChannel = channels.find((channel) => channel.name === selectedChannel);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); 
+  // Fetch channels and users when the component mounts
+  useEffect(() => {
+    fetch("http://localhost:8081/getChannels")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched channels:", data); // Debugging log
+        setChannels(Array.isArray(data.channels) ? data.channels : []);
+      })
+      .catch((err) => console.error("Error fetching channels:", err));
 
-  const handleUserSelection = (user) => {
-    if (selectedUsers.includes(user)) {
-      setSelectedUsers(selectedUsers.filter((u) => u !== user));
-    } else {
-      setSelectedUsers([...selectedUsers, user]);
-    }
+    fetch("http://localhost:8081/getUsers")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched users:", data); // Debugging log
+        setUsers(Array.isArray(data.users) ? data.users : []);
+      })
+      .catch((err) => console.error("Error fetching users:", err));
+  }, []);
+
+  const handleUserSelection = (userId) => {
+    setSelectedUsers((prevSelected) =>
+      prevSelected.includes(userId)
+        ? prevSelected.filter((id) => id !== userId)
+        : [...prevSelected, userId]
+    );
   };
 
   const handleAddUsersToChannel = () => {
-    const updatedChannels = channels.map((channel) => {
-      if (channel.name === selectedChannel) {
-        return {
-          ...channel,
-          members: [...new Set([...channel.members, ...selectedUsers])],
-        };
-      }
-      return channel;
-    });
-    setChannels(updatedChannels);
+    if (!selectedChannel) {
+      alert("Please select a channel first!");
+      return;
+    }
+
+    fetch("http://localhost:8081/addUserToChannel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channelId: selectedChannel.id, userIds: selectedUsers }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          alert("Users added successfully!");
+
+          // Refresh channels after adding users
+          fetch("http://localhost:8081/getChannels")
+            .then((response) => response.json())
+            .then((data) => setChannels(Array.isArray(data.channels) ? data.channels : []));
+        } else {
+          alert("Failed to add users: " + data.error);
+        }
+      })
+      .catch((err) => console.error("Error adding users:", err));
+
     setSelectedUsers([]);
   };
 
   const handleAddChannel = () => {
-    if (newChannel.trim() !== "") {
-      setChannels([...channels, { name: newChannel.trim(), members: [adminName] }]);
-      setNewChannel("");
-    } else {
+    if (newChannel.trim() === "") {
       alert("Channel name cannot be empty!");
+      return;
     }
+
+    fetch("http://localhost:8081/addChannel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newChannel }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          alert("Channel added successfully!");
+          setChannels([...channels, { id: data.channelId, name: newChannel, members: [] }]);
+          setNewChannel("");
+        }
+      })
+      .catch((err) => {
+        console.error("Error adding channel:", err);
+        alert(err.message || "Something went wrong.");
+      });
   };
 
   const handleLogout = () => {
-    sessionStorage.clear(); 
-    navigate("/"); 
+    sessionStorage.clear();
+    navigate("/");
   };
+
+  const currentChannel = channels.find((channel) => channel.id === selectedChannel?.id) || { name: "", members: [] };
 
   return (
     <div className="admin-dashboard">
@@ -60,11 +105,11 @@ const AdminDashboard = () => {
         <h1 className="chathaven-title">ChatHaven</h1>
         <h3>Channels</h3>
         <ul>
-          {channels.map((channel, index) => (
+          {channels.map((channel) => (
             <li
-              key={index}
-              className={selectedChannel === channel.name ? "active" : ""}
-              onClick={() => setSelectedChannel(channel.name)}
+              key={channel.id}
+              className={selectedChannel?.id === channel.id ? "active" : ""}
+              onClick={() => setSelectedChannel(channel)}
             >
               #{channel.name}
             </li>
@@ -79,18 +124,19 @@ const AdminDashboard = () => {
           />
           <button onClick={handleAddChannel}>Add</button>
         </div>
-        <button className="logout-button" onClick={handleLogout}>Logout</button>
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
-
 
       <div className="chat-section">
         <div className="chat-header">
-          <h3>#{selectedChannel}</h3>
-          <p>{currentChannel.members.length} Members</p>
+          <h3>#{currentChannel.name}</h3>
+          <p>{currentChannel.members?.length || 0} Members</p>
         </div>
         <div className="chat-messages">
           <div className="message">
-            <strong>Houda:</strong> Hi everyone! Welcome to the {selectedChannel} channel.
+            <strong>Houda:</strong> Hi everyone! Welcome to the {currentChannel.name} channel.
           </div>
           <div className="message">
             <strong>Eesha:</strong> Looking forward to discussing!
@@ -102,29 +148,28 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-
       <div className="profile-section">
-        <h3>{selectedChannel}</h3>
-        <p>Description: This is your space to collaborate and discuss all things {selectedChannel}-related.</p>
+        <h3>{currentChannel.name}</h3>
+        <p>Description: This is your space to collaborate and discuss all things {currentChannel.name}-related.</p>
         <h4>Members</h4>
         <ul>
-        {currentChannel.members.map((member, index) => (
-        <li key={index}>
-        {member} {member === adminName && <span>(Admin)</span>}
-        </li>
-        ))}
+          {currentChannel.members?.map((member, index) => (
+            <li key={index}>
+              {member} {member === adminName && <span>(Admin)</span>}
+            </li>
+          ))}
         </ul>
         <h4>Add Users to Channel</h4>
         <div className="user-selection">
-          {users.map((user, index) => (
-            <div key={index} className="user-checkbox">
+          {users.map((user) => (
+            <div key={user.id} className="user-checkbox">
               <input
                 type="checkbox"
-                id={user}
-                checked={selectedUsers.includes(user)}
-                onChange={() => handleUserSelection(user)}
+                id={`user-${user.id}`}
+                checked={selectedUsers.includes(user.id)}
+                onChange={() => handleUserSelection(user.id)}
               />
-              <label htmlFor={user}>{user}</label>
+              <label htmlFor={`user-${user.id}`}>{user.name}</label>
             </div>
           ))}
         </div>

@@ -65,6 +65,75 @@ app.post("/signup", (req, res) => {
         });
     });
 });
+
+app.post("/addChannel", (req, res) => {
+    const { name } = req.body;
+
+    console.log("Request received to add channel:", name); // Log the request body
+
+    if (!name) {
+        console.error("Channel name is missing");
+        return res.status(400).json({ error: "Channel name is required!" });
+    }
+
+    const sql = "INSERT INTO channels (name) VALUES (?)";
+    db.run(sql, [name], function (err) {
+        if (err) {
+            console.error("Error adding channel:", err);
+            return res.status(500).json({ error: "Failed to add channel" });
+        }
+        res.status(201).json({ message: "Channel added successfully", channelId: this.lastID });
+    });
+});
+
+
+app.post("/addUserToChannel", (req, res) => {
+    const { channelId, userIds } = req.body;
+
+    if (!channelId || !userIds || !Array.isArray(userIds)) {
+        return res.status(400).json({ error: "Invalid input!" });
+    }
+
+    const sql = `
+        INSERT INTO channel_members (channel_id, user_id)
+        VALUES (?, ?)
+        ON CONFLICT(channel_id, user_id) DO NOTHING
+    `;
+
+    const dbTasks = userIds.map((userId) =>
+        new Promise((resolve, reject) => {
+            db.run(sql, [channelId, userId], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        })
+    );
+
+    Promise.all(dbTasks)
+        .then(() => res.status(200).json({ message: "Users added to channel successfully" }))
+        .catch((err) => res.status(500).json({ error: "Failed to add users", details: err }));
+});
+
+app.get("/getUsers", (req, res) => {
+    const sql = "SELECT id, name FROM users";
+
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("Error fetching users:", err);
+            return res.status(500).json({ error: "Failed to fetch users" });
+        }
+
+        const users = rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+        }));
+
+        res.status(200).json({ users });
+    });
+});
+
+
+
     // app.post('/login', (req, res) => {
     //      const { email, password } = req.body; 
     //     console.log( email, password)
@@ -85,6 +154,33 @@ app.post("/signup", (req, res) => {
     //         }
     //     });
     // });
+
+    app.get("/getChannels", (req, res) => {
+        const sql = `
+            SELECT c.id AS channel_id, c.name AS channel_name, 
+                   GROUP_CONCAT(u.name) AS members
+            FROM channels c
+            LEFT JOIN channel_members cm ON c.id = cm.channel_id
+            LEFT JOIN users u ON cm.user_id = u.id
+            GROUP BY c.id
+        `;
+    
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                console.error("Error fetching channels:", err);
+                return res.status(500).json({ error: "Failed to fetch channels" });
+            }
+    
+            const channels = rows.map((row) => ({
+                id: row.channel_id,
+                name: row.channel_name,
+                members: row.members ? row.members.split(",") : [],
+            }));
+    
+            res.status(200).json({ channels });
+        });
+    });
+    
 
     app.post('/login', (req, res) => {
         const { email, password } = req.body;

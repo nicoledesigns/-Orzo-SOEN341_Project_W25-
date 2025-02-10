@@ -1,17 +1,27 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./UserDashboard.css";
 
 const UserDashboard = () => {
-  const [channels] = useState(["General", "Developer Team", "Tester Team", "Design Team"]);
-  const [selectedChannel, setSelectedChannel] = useState("General");
+  const [channels, setChannels] = useState([]);
+  const [selectedChannel, setSelectedChannel] = useState(null);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); 
+  // Fetch user channels on load
+  useEffect(() => {
+    const userId = sessionStorage.getItem("userId");
+    fetch(`http://localhost:8081/getUserChannels/${userId}`)
+      .then((response) => response.json())
+      .then((data) => setChannels(data.channels))
+      .catch((err) => console.error("Error fetching user channels:", err));
+  }, []);
 
   const handleLogout = () => {
-    sessionStorage.clear(); 
-    navigate("/"); 
+    sessionStorage.clear();
+    navigate("/");
   };
+
+  const currentChannel = channels.find((channel) => channel.id === selectedChannel?.id) || {};
 
   return (
     <div className="user-dashboard">
@@ -19,13 +29,13 @@ const UserDashboard = () => {
         <h1 className="chathaven-title">ChatHaven</h1>
         <h3>Channels</h3>
         <ul>
-          {channels.map((channel, index) => (
+          {channels.map((channel) => (
             <li
-              key={index}
-              className={selectedChannel === channel ? "active" : ""}
+              key={channel.id}
+              className={selectedChannel?.id === channel.id ? "active" : ""}
               onClick={() => setSelectedChannel(channel)}
             >
-              #{channel}
+              #{channel.name}
             </li>
           ))}
         </ul>
@@ -34,15 +44,14 @@ const UserDashboard = () => {
         </button>
       </div>
 
-
       <div className="chat-section">
         <div className="chat-header">
-          <h3>#{selectedChannel}</h3>
-          <p>15 Members</p>
+          <h3>#{currentChannel.name}</h3>
+          <p>{currentChannel.members?.length || 0} Members</p>
         </div>
         <div className="chat-messages">
           <div className="message">
-            <strong>Houda:</strong> Hi everyone! Welcome to the {selectedChannel} channel.
+            <strong>Houda:</strong> Hi everyone! Welcome to the {currentChannel.name} channel.
           </div>
           <div className="message">
             <strong>Eesha:</strong> Looking forward to discussing!
@@ -54,18 +63,14 @@ const UserDashboard = () => {
         </div>
       </div>
 
-
       <div className="profile-section">
-        <h3>{selectedChannel}</h3>
-        <p>Description: This is your space to collaborate and discuss all things {selectedChannel}-related.</p>
+        <h3>{currentChannel.name}</h3>
+        <p>Description: This is your space to collaborate and discuss all things {currentChannel.name}-related.</p>
         <h4>Members</h4>
         <ul>
-          <li>Houda</li>
-          <li>Eesha</li>
-          <li>Edwin</li>
-          <li>Yassine</li>
-          <li>Nicole</li>
-          <li>Karan</li>
+          {currentChannel.members?.map((member) => (
+            <li key={member.id}>{member.name}</li>
+          ))}
         </ul>
       </div>
     </div>
