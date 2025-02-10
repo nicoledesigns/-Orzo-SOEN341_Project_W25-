@@ -69,7 +69,7 @@ app.post("/signup", (req, res) => {
 app.post("/addChannel", (req, res) => {
     const { name } = req.body;
 
-    console.log("Request received to add channel:", name); // Log the request body
+    console.log("Received request to add channel:", req.body);
 
     if (!name) {
         console.error("Channel name is missing");
@@ -82,9 +82,12 @@ app.post("/addChannel", (req, res) => {
             console.error("Error adding channel:", err);
             return res.status(500).json({ error: "Failed to add channel" });
         }
+        console.log("Channel added successfully with ID:", this.lastID); 
         res.status(201).json({ message: "Channel added successfully", channelId: this.lastID });
     });
 });
+
+
 
 
 app.post("/addUserToChannel", (req, res) => {
@@ -209,7 +212,6 @@ app.get("/getUsers", (req, res) => {
     
                 if (result) {
                     console.log("Login successful:", row);
-                    // Send back only necessary user data
                     return res.json({
                         message: "Login successful",
                         user: {

@@ -11,12 +11,12 @@ const AdminDashboard = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch channels and users when the component mounts
+
   useEffect(() => {
     fetch("http://localhost:8081/getChannels")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched channels:", data); // Debugging log
+        console.log("Fetched channels:", data); 
         setChannels(Array.isArray(data.channels) ? data.channels : []);
       })
       .catch((err) => console.error("Error fetching channels:", err));
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
     fetch("http://localhost:8081/getUsers")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched users:", data); // Debugging log
+        console.log("Fetched users:", data); 
         setUsers(Array.isArray(data.users) ? data.users : []);
       })
       .catch((err) => console.error("Error fetching users:", err));
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
         if (data.message) {
           alert("Users added successfully!");
 
-          // Refresh channels after adding users
+  
           fetch("http://localhost:8081/getChannels")
             .then((response) => response.json())
             .then((data) => setChannels(Array.isArray(data.channels) ? data.channels : []));
@@ -69,28 +69,37 @@ const AdminDashboard = () => {
 
   const handleAddChannel = () => {
     if (newChannel.trim() === "") {
-      alert("Channel name cannot be empty!");
-      return;
+        alert("Channel name cannot be empty!");
+        return;
     }
 
     fetch("http://localhost:8081/addChannel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newChannel }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newChannel }),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message) {
-          alert("Channel added successfully!");
-          setChannels([...channels, { id: data.channelId, name: newChannel, members: [] }]);
-          setNewChannel("");
-        }
-      })
-      .catch((err) => {
-        console.error("Error adding channel:", err);
-        alert(err.message || "Something went wrong.");
-      });
-  };
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((data) => {
+                    throw new Error(data.error || "Failed to add channel");
+                });
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log("Add channel response:", data); 
+            if (data.message) {
+                alert("Channel added successfully!");
+                setChannels([...channels, { id: data.channelId, name: newChannel, members: [] }]);
+                setNewChannel("");
+            }
+        })
+        .catch((err) => {
+            console.error("Error adding channel:", err);
+            alert(err.message || "Something went wrong.");
+        });
+};
+
 
   const handleLogout = () => {
     sessionStorage.clear();
