@@ -28,34 +28,35 @@ const LoginSignup = () => {
             .catch(err => console.error("Signup Error:", err));
     };
 
-    // Handle Login
     const handleLogin = (event) => {
-      event.preventDefault();
-      axios.post('http://localhost:8081/login', { email, password })
-          .then(res => {
-              console.log("Login Response:", res.data);
-              
-              const userRole = res.data.user.role; 
-              const userName = res.data.user.name;
-
-              sessionStorage.setItem("userName", userName);
-              sessionStorage.setItem("userRole", userRole);
-  
-              
-              if (userRole === "admin") {
-                  navigate('/admin-dashboard');
-              } else if (userRole === "user") {
-                  navigate('/user-dashboard');
-              } else {
-                  alert("Unknown role. Cannot redirect.");
-              }
-          })
-          .catch(err => {
-              console.log("Login Error:", err.response?.data || err);
-              alert(err.response?.data?.error || "Invalid credentials. Please try again.");
-          });
-  };
-
+        event.preventDefault();
+        axios.post('http://localhost:8081/login', { email, password })
+            .then(res => {
+                console.log("Login Response:", res.data);
+    
+                const userId = res.data.user.id; 
+                const userRole = res.data.user.role; 
+                const userName = res.data.user.name;
+    
+        
+                sessionStorage.setItem("userId", userId);
+                sessionStorage.setItem("userName", userName);
+                sessionStorage.setItem("userRole", userRole);
+    
+                if (userRole === "admin") {
+                    navigate('/admin-dashboard');
+                } else if (userRole === "user") {
+                    navigate('/user-dashboard');
+                } else {
+                    alert("Unknown role. Cannot redirect.");
+                }
+            })
+            .catch(err => {
+                console.log("Login Error:", err.response?.data || err);
+                alert(err.response?.data?.error || "Invalid credentials. Please try again.");
+            });
+    };
+    
     return (
         <div className='container'>
             <div className="bubbles">
