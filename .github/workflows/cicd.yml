@@ -1,0 +1,81 @@
+name: CICD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chckout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Create .env file
+        run: |
+          echo DATABASE_URL=orzo_chatheaven/orzo_chatheaven.db > orzo_chatheaven/.env
+          echo NODE_ENV=development >> orzo_chatheaven/.env
+
+      - name: Clean npm cache and node_modules
+        run: |
+          cd orzo_chatheaven
+          npm cache clean --force
+          rm -rf node_modules
+          rm -f package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd orzo_chatheaven
+          npm install --legacy-peer-deps
+
+      - name: Run tests
+        run: |
+          cd orzo_chatheaven
+          npm run test
+
+      - name: Build frontend
+        run: |
+          cd orzo_chatheaven
+          npm run build
+
+      - name: Start backend server
+        run: |
+          cd orzo_chatheaven
+          npm run start-server  
+
+  CD:
+    if: github.ref == 'refs/heads/main'
+    needs: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd orzo_chatheaven
+          npm install --legacy-peer-deps
+
+      - name: Build Frontend
+        run: |
+          cd orzo_chatheaven
+          npm run build
+
+      - name: Deploy to Production
+        run: |
+          cd orzo_chatheaven
+          npm run deploy
