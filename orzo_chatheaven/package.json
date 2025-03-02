@@ -41,7 +41,7 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
     "@testing-library/jest-dom": "^5.16.5"
   }
 }
