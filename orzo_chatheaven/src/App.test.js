@@ -1,9 +1,15 @@
-import { render, screen } from '@testing-library/react';
-import App from '../App';
-import '@testing-library/jest-dom';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import App from "./App";
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test("renders LoginSignup page by default", () => {
+  render(
+    <MemoryRouter>
+      <App />
+    </MemoryRouter>
+  );
+
+  // Check if the default LoginSignup component renders
+  expect(screen.getByText("Sign Up")).toBeInTheDocument();
 });

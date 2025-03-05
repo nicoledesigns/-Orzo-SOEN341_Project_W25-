@@ -9,8 +9,8 @@
     "cra-template": "1.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5",
-    "react-scripts": "^5.0.1",
+    "react-router-dom": "^7.2.0",
+    "react-scripts": "^3.0.1",
     "sqlite3": "^5.1.7",
     "web-vitals": "^4.2.4"
   },
@@ -19,8 +19,9 @@
     "start-react": "react-scripts start",
     "start-server": "node src/server2.js",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test --watchAll=false",
+    "test:react": "react-scripts test --watchAll=false",
+    "test:backend": "jest server/__tests__/server.test.js --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -41,8 +42,8 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
+    "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
-    "@testing-library/jest-dom": "^5.16.5"
+    "concurrently": "^9.1.2"
   }
 }
