@@ -40,17 +40,17 @@ jobs:
       - name: Run tests
         run: |
           cd orzo_chatheaven
-          npm run test
+          NODE_ENV=test npm run test
 
       - name: Build frontend
         run: |
           cd orzo_chatheaven
-          npm run build
+          NODE_ENV=test npm run build
 
       - name: Start backend server
         run: |
           cd orzo_chatheaven
-          npm run start-server  
+          NODE_ENV=test npm run start-server  
 
   CD:
     if: github.ref == 'refs/heads/main'
