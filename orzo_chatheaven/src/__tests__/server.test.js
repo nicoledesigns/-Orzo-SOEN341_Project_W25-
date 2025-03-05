@@ -75,10 +75,14 @@ describe("🔥 ChatHaven API Tests", () => {
     
 });
 
-afterAll((done) => {
-    db.close(() => {
-        server.close(()=> {
-            done();
-        })
-    });
+afterAll(async () => {
+    await new Promise((resolve) => db.close(() => {
+        console.log("Database connection closed.");
+        resolve();
+    }));
+
+    await new Promise((resolve) => server.close(() => {
+        console.log("Server closed.");
+        resolve();
+    }));
 });
