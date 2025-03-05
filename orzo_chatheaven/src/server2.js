@@ -220,7 +220,7 @@ app.get("/getChannels", (req, res) => {
     });
 });
 
-//sending a message to a channel 
+//sending a message to a channel, Karan check this for the data base and modify what you deem necessary
 app.post("/sendMessage", (req, res) => {
     const { userId, channelId, message } = req.body;
 
@@ -238,6 +238,39 @@ app.post("/sendMessage", (req, res) => {
         res.status(201).json({ message: "Message sent successfully", messageId: this.lastID });
     });
 });
+
+// messaging in a specific channel
+app.get("/getChannelMessages/:channelId", (req, res) => {
+    const { channelId } = req.params;
+
+    if (!channelId) {
+        return res.status(400).json({ error: "Channel ID is required" });
+    }
+    //getting the messages from data base copilot generated, karan senpai please check this
+    const sql = `
+        SELECT m.id AS message_id, m.message, m.created_at, u.name AS user_name
+        FROM messages m
+        INNER JOIN users u ON m.user_id = u.id
+        WHERE m.channel_id = ?
+    `;
+
+    db.all(sql, [channelId], (err, rows) => {
+        if (err) {
+            console.error("Error fetching channel messages:", err);
+            return res.status(500).json({ error: "Failed to fetch channel messages" });
+        }
+
+        const messages = rows.map((row) => ({
+            id: row.message_id,
+            message: row.message,
+            createdAt: row.created_at,
+            user: row.user_name,
+        }));
+
+        res.status(200).json({ messages });
+    });
+});
+
 
 // Start the server
 app.listen(8081, () => {
