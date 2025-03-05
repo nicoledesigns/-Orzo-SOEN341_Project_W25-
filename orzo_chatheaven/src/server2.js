@@ -220,6 +220,25 @@ app.get("/getChannels", (req, res) => {
     });
 });
 
+//sending a message to a channel 
+app.post("/sendMessage", (req, res) => {
+    const { userId, channelId, message } = req.body;
+
+    if (!userId || !channelId || !message) {
+        return res.status(400).json({ error: "Invalid input!" });
+    }
+
+    const sql = "INSERT INTO messages (user_id, channel_id, message) VALUES (?, ?, ?)";
+    db.run(sql, [userId, channelId, message], function (err) {
+        if (err) {
+            console.error("Error sending message:", err);
+            return res.status(500).json({ error: "Failed to send message" });
+        }
+        console.log("Message sent successfully with ID:", this.lastID);
+        res.status(201).json({ message: "Message sent successfully", messageId: this.lastID });
+    });
+});
+
 // Start the server
 app.listen(8081, () => {
     console.log("Server is listening on http://localhost:8081");
