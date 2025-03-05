@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-export const app = express();
+const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -222,6 +222,7 @@ app.get("/getChannels", (req, res) => {
 });
 
 // Start the server
-app.listen(8081, () => {
+export const server = app.listen(8081, () => {
     console.log("Server is listening on http://localhost:8081");
 });
+

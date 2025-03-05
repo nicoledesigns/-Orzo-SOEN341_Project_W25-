@@ -1,5 +1,5 @@
 const request = require("supertest");
-const { app } = require("../server2"); // Ensure this correctly exports `app`
+const { server } = require("../server2"); // Ensure this correctly exports `server`
 const sqlite3 = require("sqlite3");
 const path = require("path");
 
@@ -49,7 +49,7 @@ describe("🔥 ChatHaven API Tests", () => {
 
     // ✅ **Test User Signup**
     test("POST /signup → should register a new user", async () => {
-        const res = await request(app).post("/signup").send(testUser);
+        const res = await request(server).post("/signup").send(testUser);
         expect(res.status).toBe(201);
         expect(res.body.message).toBe("User registered successfully");
         testUserId = res.body.userId; // Store User ID for later use
@@ -57,7 +57,7 @@ describe("🔥 ChatHaven API Tests", () => {
 
     // ✅ **Test User Login**
     test("POST /login → should log in an existing user", async () => {
-        const res = await request(app).post("/login").send({
+        const res = await request(server).post("/login").send({
             email: testUser.email,
             password: testUser.password,
         });
@@ -67,7 +67,7 @@ describe("🔥 ChatHaven API Tests", () => {
     });
 
     test("POST /addChannel → should create a new channel", async () => {
-        const res = await request(app).post("/addChannel").send({ name: "Test Channel" });
+        const res = await request(server).post("/addChannel").send({ name: "Test Channel" });
         expect(res.status).toBe(201);
         expect(res.body.message).toBe("Channel added successfully");
         expect(res.body.channelId).toBeDefined(); 
@@ -77,6 +77,8 @@ describe("🔥 ChatHaven API Tests", () => {
 
 afterAll((done) => {
     db.close(() => {
-        done();
+        server.close(()=> {
+            done();
+        })
     });
 });
