@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminDashboard Snapshot Tests AdminDashboard renders correctly when a channel is selected 1`] = `null`;
+
+exports[`AdminDashboard Snapshot Tests AdminDashboard renders correctly when a new channel is added 1`] = `null`;
+
+exports[`AdminDashboard Snapshot Tests AdminDashboard renders correctly when users are added to a channel 1`] = `null`;
+
+exports[`AdminDashboard Snapshot Tests AdminDashboard renders correctly with channels and users 1`] = `null`;
+
+exports[`AdminDashboard Snapshot Tests AdminDashboard renders correctly with no channels 1`] = `null`;
+
+exports[`AdminDashboard renders correctly 1`] = `null`;

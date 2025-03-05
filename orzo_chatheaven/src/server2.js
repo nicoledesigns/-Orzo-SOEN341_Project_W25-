@@ -4,11 +4,13 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-const app = express();
+export const app = express();
 app.use(cors());
 app.use(express.json());
 
-const dbPath = path.join(__dirname, 'db', 'orzo_chatheaven.db');
+const dbPath = process.env.NODE_ENV === "test"
+  ? path.join(__dirname, "db", "test_orzo_chatheaven.db")
+  : path.join(__dirname, "db", "orzo_chatheaven.db");
 
 
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -77,7 +79,6 @@ app.post('/login', (req, res) => {
             }
 
             if (result) {
-                console.log("Login successful:", row);
                 return res.json({
                     message: "Login successful",
                     user: {
