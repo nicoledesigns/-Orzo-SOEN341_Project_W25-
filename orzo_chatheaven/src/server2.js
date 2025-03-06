@@ -120,7 +120,7 @@ app.post("/addChannel", (req, res) => {
     });
     //this creates a new file each time there is a new channel created (still has to be tested)
     const folderPath = '/orzo_chatheaven/src/db';
-    const fileName = '#${channelId}.txt';
+    const fileName = `#${channelId}.txt`;
     const filePath = path.join(folderPath, fileName);
 
     fs.writeFile(filePath, '', function (err) {
@@ -247,9 +247,7 @@ app.post("/sendMessage", (req, res) => {
     const formattedMessage = `${userId}; ${message}; ${formattedDate}`;
     const specificFile = dataPath.concat("/#", channelId.toString(), ".txt");
 
-
-
-    fs.writeFile(specificFile, formattedMessage, err => {
+    fs.appendFile(specificFile, formattedMessage, err => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Invalid channel!" });
@@ -257,53 +255,56 @@ app.post("/sendMessage", (req, res) => {
             console.log(formattedMessage);
         }
     });
-
-
-    //const sql = "INSERT INTO messages (user_id, channel_id, message) VALUES (?, ?, ?)";
-    // db.run(sql, [userId, channelId, message], function (err) {
-    //     if (err) {
-    //         console.error("Error sending message:", err);
-    //         return res.status(500).json({ error: "Failed to send message" });
-    //     }
-    //     console.log("Message sent successfully with ID:", this.lastID);
-    //     res.status(201).json({ message: "Message sent successfully", messageId: this.lastID });
-    // });
 });
 
 // messaging in a specific channel
-app.get("/loadMessages", (req, res) => {
-    const { channelId } = req.body;
+app.get("/loadMessages/:channelId", (req, res) => {
+    const { channelId } = req.params;
 
     if (!channelId) {
         return res.status(400).json({ error: "Channel ID is required" });
     }
 
-    //still have to write code
-    res.status(200).json({ messages });
-    //getting the messages from data base copilot generated, karan senpai please check this
-    // const sql = `
-    //     SELECT m.id AS message_id, m.message, m.created_at, u.name AS user_name
-    //     FROM messages m
-    //     INNER JOIN users u ON m.user_id = u.id
-    //     WHERE m.channel_id = ?
-    // `;
+    const filePath = path.join(__dirname, `#${channelId}.txt`);
+    const sql = 'SELECT name FROM users WHERE '
 
-    // db.all(sql, [channelId], (err, rows) => {
-    //     if (err) {
-    //         console.error("Error fetching channel messages:", err);
-    //         return res.status(500).json({ error: "Failed to fetch channel messages" });
-    //     }
+    fs.readFile(filePath, "utf8", (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Failed to read file" });
+        }
 
-    //     const messages = rows.map((row) => ({
-    //         id: row.message_id,
-    //         message: row.message,
-    //         createdAt: row.created_at,
-    //         user: row.user_name,
-    //     }));
+        const messages = data
+            .split("\n")
+            .filter(line => line.trim() !== "") // Remove empty lines
+            .map(line => {
+                const [userId, message, time] = line.split(";");
+                return { userId, message, time };
+            });
 
-    //     res.status(200).json({ messages });
-    // });
+        const userIds = [...new Set(messages.map(msg => msg.userId))];
+        const placeholders = userIds.map(() => "?").join(",");
+        const sql = `SELECT id, name FROM users WHERE userId IN (${placeholders})`;
 
+        db.all(sql, userIds, (err, rows) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ error: "Failed to fetch user data" });
+            }
+
+            const userMap = Object.fromEntries(rows.map(user => [user.id.toString(), user.name]));
+
+
+            const enrichedMessages = messages.map(msg => ({
+                userId: msg.userId,
+                username: userMap[msg.userId] || "Unknown",
+                message: msg.message,
+                time: msg.time
+            }));
+
+
+            res.status(200).json({ enrichedMessages });
+        });
+    });
 });
 
 
