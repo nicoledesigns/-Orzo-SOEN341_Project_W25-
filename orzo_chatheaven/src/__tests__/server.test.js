@@ -45,17 +45,17 @@ beforeAll((done) => {
     });
 });
 
-describe("🔥 ChatHaven API Tests", () => {
+describe(" ChatHaven API Tests", () => {
 
-    // ✅ **Test User Signup**
+ 
     test("POST /signup → should register a new user", async () => {
         const res = await request(server).post("/signup").send(testUser);
         expect(res.status).toBe(201);
         expect(res.body.message).toBe("User registered successfully");
-        testUserId = res.body.userId; // Store User ID for later use
+        testUserId = res.body.userId; 
     });
 
-    // ✅ **Test User Login**
+    
     test("POST /login → should log in an existing user", async () => {
         const res = await request(server).post("/login").send({
             email: testUser.email,
