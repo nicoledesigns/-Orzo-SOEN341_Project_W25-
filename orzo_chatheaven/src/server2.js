@@ -3,6 +3,9 @@ const sqlite3 = require('sqlite3');
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const fs = require('node:fs');
+const { formatDate } = require('./tools');
+const { channel } = require('node:diagnostics_channel');
 
 const app = express();
 app.use(cors());
@@ -81,7 +84,7 @@ app.post('/login', (req, res) => {
                 return res.json({
                     message: "Login successful",
                     user: {
-                        id: row.id, 
+                        id: row.id,
                         name: row.name,
                         email: row.email,
                         role: row.role
@@ -99,7 +102,7 @@ app.post('/login', (req, res) => {
 // Add a new channel
 app.post("/addChannel", (req, res) => {
     const { name } = req.body;
-
+    var channelId;
     if (!name) {
         console.error("Channel name is missing");
         return res.status(400).json({ error: "Channel name is required!" });
@@ -111,8 +114,18 @@ app.post("/addChannel", (req, res) => {
             console.error("Error adding channel:", err);
             return res.status(500).json({ error: "Failed to add channel" });
         }
+        channelId = this.lastID;
         console.log("Channel added successfully with ID:", this.lastID);
         res.status(201).json({ message: "Channel added successfully", channelId: this.lastID });
+    });
+    //this creates a new file each time there is a new channel created (still has to be tested)
+    const folderPath = '/orzo_chatheaven/src/db';
+    const fileName = '#${channelId}.txt';
+    const filePath = path.join(folderPath, fileName);
+
+    fs.writeFile(filePath, '', function (err) {
+        if (err) throw err;
+        console.log(`File created: ${filePath}`);
     });
 });
 
@@ -220,7 +233,7 @@ app.get("/getChannels", (req, res) => {
     });
 });
 
-//sending a message to a channel, Karan check this for the data base and modify what you deem necessary
+//writes the message received in a file that is corresponding to the channel id
 app.post("/sendMessage", (req, res) => {
     const { userId, channelId, message } = req.body;
 
@@ -228,47 +241,69 @@ app.post("/sendMessage", (req, res) => {
         return res.status(400).json({ error: "Invalid input!" });
     }
 
-    const sql = "INSERT INTO messages (user_id, channel_id, message) VALUES (?, ?, ?)";
-    db.run(sql, [userId, channelId, message], function (err) {
+    const dataPath = '/orzo_chatheaven/src/db';
+    const date = new Date();
+    const formattedDate = formatDate(date);
+    const formattedMessage = `${userId}; ${message}; ${formattedDate}`;
+    const specificFile = dataPath.concat("/#", channelId.toString(), ".txt");
+
+
+
+    fs.writeFile(specificFile, formattedMessage, err => {
         if (err) {
-            console.error("Error sending message:", err);
-            return res.status(500).json({ error: "Failed to send message" });
+            console.error(err);
+            return res.status(500).json({ error: "Invalid channel!" });
+        } else {
+            console.log(formattedMessage);
         }
-        console.log("Message sent successfully with ID:", this.lastID);
-        res.status(201).json({ message: "Message sent successfully", messageId: this.lastID });
     });
+
+
+    //const sql = "INSERT INTO messages (user_id, channel_id, message) VALUES (?, ?, ?)";
+    // db.run(sql, [userId, channelId, message], function (err) {
+    //     if (err) {
+    //         console.error("Error sending message:", err);
+    //         return res.status(500).json({ error: "Failed to send message" });
+    //     }
+    //     console.log("Message sent successfully with ID:", this.lastID);
+    //     res.status(201).json({ message: "Message sent successfully", messageId: this.lastID });
+    // });
 });
 
 // messaging in a specific channel
-app.get("/getChannelMessages/:channelId", (req, res) => {
-    const { channelId } = req.params;
+app.get("/loadMessages", (req, res) => {
+    const { channelId } = req.body;
 
     if (!channelId) {
         return res.status(400).json({ error: "Channel ID is required" });
     }
+
+    //still have to write code
+    res.status(200).json({ messages });
     //getting the messages from data base copilot generated, karan senpai please check this
-    const sql = `
-        SELECT m.id AS message_id, m.message, m.created_at, u.name AS user_name
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.id
-        WHERE m.channel_id = ?
-    `;
+    // const sql = `
+    //     SELECT m.id AS message_id, m.message, m.created_at, u.name AS user_name
+    //     FROM messages m
+    //     INNER JOIN users u ON m.user_id = u.id
+    //     WHERE m.channel_id = ?
+    // `;
 
-    db.all(sql, [channelId], (err, rows) => {
-        if (err) {
-            console.error("Error fetching channel messages:", err);
-            return res.status(500).json({ error: "Failed to fetch channel messages" });
-        }
+    // db.all(sql, [channelId], (err, rows) => {
+    //     if (err) {
+    //         console.error("Error fetching channel messages:", err);
+    //         return res.status(500).json({ error: "Failed to fetch channel messages" });
+    //     }
 
-        const messages = rows.map((row) => ({
-            id: row.message_id,
-            message: row.message,
-            createdAt: row.created_at,
-            user: row.user_name,
-        }));
+    //     const messages = rows.map((row) => ({
+    //         id: row.message_id,
+    //         message: row.message,
+    //         createdAt: row.created_at,
+    //         user: row.user_name,
+    //     }));
 
-        res.status(200).json({ messages });
-    });
+    //     res.status(200).json({ messages });
+    // });
+
 });
 
 
