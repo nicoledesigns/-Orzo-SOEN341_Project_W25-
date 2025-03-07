@@ -222,8 +222,11 @@ app.get("/getChannels", (req, res) => {
 });
 
 // Start the server
-app.listen(8081, () => {
+const server = app.listen(8081, () => {
     console.log("Server is listening on http://localhost:8081");
 });
 
 
+
+
+module.exports = { app, server };
