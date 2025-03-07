@@ -50,7 +50,8 @@ jobs:
       - name: Start backend server
         run: |
           cd orzo_chatheaven
-          npm run start-server  
+          npm run start-server &
+          curl http://localhost:8081/getUserChannels/1
 
   CD:
     if: github.ref == 'refs/heads/main'
