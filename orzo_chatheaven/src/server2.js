@@ -119,9 +119,8 @@ app.post("/addChannel", (req, res) => {
         res.status(201).json({ message: "Channel added successfully", channelId: this.lastID });
     });
     //this creates a new file each time there is a new channel created (still has to be tested)
-    const folderPath = '/orzo_chatheaven/src/db';
-    const fileName = `#${channelId}.txt`;
-    const filePath = path.join(folderPath, fileName);
+
+    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
 
     fs.writeFile(filePath, '', function (err) {
         if (err) throw err;
@@ -264,8 +263,7 @@ app.get("/loadMessages/:channelId", (req, res) => {
     if (!channelId) {
         return res.status(400).json({ error: "Channel ID is required" });
     }
-
-    const filePath = path.join(__dirname, `#${channelId}.txt`);
+    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
     const sql = 'SELECT name FROM users WHERE '
 
     fs.readFile(filePath, "utf8", (err, data) => {
@@ -315,7 +313,8 @@ app.delete("/deleteMessage/:channelId/:userId/:message/:time", (req, res) => {
         return res.status(400).json({ error: "Invalid input!" });
     }
     // Path to the file. would be good if the text file had the channel id as the name - REMEMBER 
-    const filePath = path.join(__dirname, `#${channelId}.txt`);
+    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
+
 
     // Check if the user is an admin
     if (!isAdmin(userId)) {
