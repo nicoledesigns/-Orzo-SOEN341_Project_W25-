@@ -74,6 +74,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd orzo_chatheaven
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Deploy to Production
