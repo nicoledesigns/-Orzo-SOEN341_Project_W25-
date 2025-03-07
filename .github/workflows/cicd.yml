@@ -45,6 +45,7 @@ jobs:
       - name: Build frontend
         run: |
           cd orzo_chatheaven
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Start backend server
