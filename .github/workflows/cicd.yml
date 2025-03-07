@@ -35,12 +35,12 @@ jobs:
       - name: Install dependencies
         run: |
           cd orzo_chatheaven
-          npm install --legacy-peer-deps
+          npm install --force
 
       - name: Run tests
         run: |
           cd orzo_chatheaven
-          npm run test
+          NODE_ENV=test npm run test
 
       - name: Build frontend
         run: |
@@ -50,7 +50,9 @@ jobs:
       - name: Start backend server
         run: |
           cd orzo_chatheaven
-          npm run start-server  
+          npm run start-server &
+          sleep 5
+          curl http://localhost:8081/getUserChannels/1
 
   CD:
     if: github.ref == 'refs/heads/main'
@@ -63,12 +65,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: '21'
 
       - name: Install dependencies
         run: |
           cd orzo_chatheaven
-          npm install --legacy-peer-deps
+          npm install --force
 
       - name: Build Frontend
         run: |
