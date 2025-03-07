@@ -102,7 +102,6 @@ app.post('/login', (req, res) => {
 // Add a new channel
 app.post("/addChannel", (req, res) => {
     const { name } = req.body;
-    var channelId;
     if (!name) {
         console.error("Channel name is missing");
         return res.status(400).json({ error: "Channel name is required!" });
@@ -114,18 +113,22 @@ app.post("/addChannel", (req, res) => {
             console.error("Error adding channel:", err);
             return res.status(500).json({ error: "Failed to add channel" });
         }
-        channelId = this.lastID;
+        const channelId = this.lastID;
         console.log("Channel added successfully with ID:", this.lastID);
+
+
+        const filePath = path.join(__dirname, 'db', `#${channelId}.txt`)
+
+        fs.writeFile(filePath, '', function (err) {
+            if (err) throw err;
+            console.log(`File created: ${filePath}`);
+        });
+
         res.status(201).json({ message: "Channel added successfully", channelId: this.lastID });
     });
     //this creates a new file each time there is a new channel created (still has to be tested)
 
-    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
 
-    fs.writeFile(filePath, '', function (err) {
-        if (err) throw err;
-        console.log(`File created: ${filePath}`);
-    });
 });
 
 // Get channels for a specific user
@@ -306,58 +309,58 @@ app.get("/loadMessages/:channelId", (req, res) => {
 });
 
 //deleteting a message in a specific channel by an admin
-app.delete("/deleteMessage/:channelId/:userId/:message/:time", (req, res) => {
-    const { channelId, userId, message, time } = req.params;
+// app.delete("/deleteMessage/:channelId/:userId/:message/:time", (req, res) => {
+//     const { channelId, userId, message, time } = req.params;
 
-    if (!channelId || !userId || !message || !time) {
-        return res.status(400).json({ error: "Invalid input!" });
-    }
-    // Path to the file. would be good if the text file had the channel id as the name - REMEMBER 
-    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
+//     if (!channelId || !userId || !message || !time) {
+//         return res.status(400).json({ error: "Invalid input!" });
+//     }
+//     // Path to the file. would be good if the text file had the channel id as the name - REMEMBER 
+//     const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
 
 
-    // Check if the user is an admin
-    if (!isAdmin(userId)) {
-        return res.status(403).json({ error: "Not authorized" });
-    }
+//     // Check if the user is an admin
+//     if (!isAdmin(userId)) {
+//         return res.status(403).json({ error: "Not authorized" });
+//     }
 
-    // Read the file
-    fs.readFile(filePath, "utf8", (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: "Failed to read file" });
-        }
+//     // Read the file
+//     fs.readFile(filePath, "utf8", (err, data) => {
+//         if (err) {
+//             return res.status(500).json({ error: "Failed to read file" });
+//         }
 
-        // Parse the messages from the file
-        const messages = data
-            .split("\n")
+//         // Parse the messages from the file
+//         const messages = data
+//             .split("\n")
 
-            .map(line => {
-                const [msgUserId, msg, msgTime] = line.split(";");
-                return { msgUserId, msg, msgTime };
-            });
+//             .map(line => {
+//                 const [msgUserId, msg, msgTime] = line.split(";");
+//                 return { msgUserId, msg, msgTime };
+//             });
 
-        // Find the message to delete by matching userId, message, and time
-        const index = messages.findIndex(msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time);
-        if (index === -1) {
-            return res.status(404).json({ error: "Message not found" });
-        }
+//         // Find the message to delete by matching userId, message, and time
+//         const index = messages.findIndex(msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time);
+//         if (index === -1) {
+//             return res.status(404).json({ error: "Message not found" });
+//         }
 
-        // Delete the message
-        messages.splice(index, 1);
+//         // Delete the message
+//         messages.splice(index, 1);
 
-        // Create new content to save back to the file
-        const newContent = messages.map(msg => `${msg.msgUserId};${msg.msg};${msg.msgTime}`).join("\n");
+//         // Create new content to save back to the file
+//         const newContent = messages.map(msg => `${msg.msgUserId};${msg.msg};${msg.msgTime}`).join("\n");
 
-        // Write the new content to the file
-        fs.writeFile(filePath, newContent, (err) => {
-            if (err) {
-                return res.status(500).json({ error: "Failed to write file" });
-            }
+//         // Write the new content to the file
+//         fs.writeFile(filePath, newContent, (err) => {
+//             if (err) {
+//                 return res.status(500).json({ error: "Failed to write file" });
+//             }
 
-            res.status(200).json({ message: "Message deleted successfully" });
-        });
-    });
-});
+//             res.status(200).json({ message: "Message deleted successfully" });
+//         });
+//     });
+// });
 
 
 
