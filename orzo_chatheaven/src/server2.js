@@ -307,6 +307,60 @@ app.get("/loadMessages/:channelId", (req, res) => {
     });
 });
 
+//deleteting a message in a specific channel by an admin
+app.delete("/deleteMessage/:channelId/:userId/:message/:time", (req, res) => {
+    const { channelId, userId, message, time } = req.params;
+
+    if (!channelId || !userId || !message || !time) {
+        return res.status(400).json({ error: "Invalid input!" });
+    }
+    // Path to the file. would be good if the text file had the channel id as the name - REMEMBER 
+    const filePath = path.join(__dirname, `#${channelId}.txt`);
+
+    // Check if the user is an admin
+    if (!isAdmin(userId)) {
+        return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Read the file
+    fs.readFile(filePath, "utf8", (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Failed to read file" });
+        }
+
+        // Parse the messages from the file
+        const messages = data
+            .split("\n")
+
+            .map(line => {
+                const [msgUserId, msg, msgTime] = line.split(";");
+                return { msgUserId, msg, msgTime };
+            });
+
+        // Find the message to delete by matching userId, message, and time
+        const index = messages.findIndex(msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time);
+        if (index === -1) {
+            return res.status(404).json({ error: "Message not found" });
+        }
+
+        // Delete the message
+        messages.splice(index, 1);
+
+        // Create new content to save back to the file
+        const newContent = messages.map(msg => `${msg.msgUserId};${msg.msg};${msg.msgTime}`).join("\n");
+
+        // Write the new content to the file
+        fs.writeFile(filePath, newContent, (err) => {
+            if (err) {
+                return res.status(500).json({ error: "Failed to write file" });
+            }
+
+            res.status(200).json({ message: "Message deleted successfully" });
+        });
+    });
+});
+
+
 
 // Start the server
 app.listen(8081, () => {
