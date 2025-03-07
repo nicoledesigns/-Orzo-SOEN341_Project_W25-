@@ -9,7 +9,7 @@ const allowedColors = [
   "#ff8c00", "#9400d3", "#00ced1", "#ffd700", "#dc143c"
 ];
 
-const Messages = ({ selectedChannel }) => {
+const Messages = ({ selectedChannel, handleDeleteMessage }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userColors, setUserColors] = useState({});
@@ -17,6 +17,9 @@ const Messages = ({ selectedChannel }) => {
   // Assume that userId and userName are stored in sessionStorage after login.
   const userId = sessionStorage.getItem("userId");
   const userName = sessionStorage.getItem("userName");
+  // Check if the current user is an admin for deleting a message
+  const isAdmin = userName === "Admin";
+
 
   // Fetch messages when the selected channel changes or after sending a new message.
   useEffect(() => {
@@ -50,8 +53,14 @@ const Messages = ({ selectedChannel }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
+  // Nicole: State for sending status (success or error)
+  const [sendStatus, setSendStatus] = useState(""); 
+
   const handleMessageSend = () => {
     if (!selectedChannel || message.trim() === "") return;
+    
+    // Nicole: Reset status before sending a new message
+    setSendStatus("Error sending message. Please try again."); 
 
     fetch("http://localhost:8081/sendMessage", {
       method: "POST",
@@ -75,8 +84,27 @@ const Messages = ({ selectedChannel }) => {
           setMessages(data.enrichedMessages);
         }
         setMessage("");
+        //Nicole: Success feedback
+        setSendStatus("Message sent successfully!"); 
+
       })
       .catch(err => console.error("Error sending message:", err));
+      //Nicole: Error feedback
+      setSendStatus("Error sending message. Please try again."); 
+
+  };
+
+  const refreshMessages = () => { //Added refreshMessages function
+    if (selectedChannel) {
+      fetch(`http://localhost:8081/loadMessages/${selectedChannel.id}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.enrichedMessages) {
+            setMessages(data.enrichedMessages);
+          }
+        })
+        .catch(err => console.error("Error loading messages:", err));
+    }
   };
 
   return (
@@ -154,10 +182,22 @@ const Messages = ({ selectedChannel }) => {
                 </strong>{" "}
                 {msg.message}
                 <div className="timestamp">{msg.time}</div>
-              </div>
-            );
-          })}
-        </div>
+                  {/* Show delete button only if the message is from Admin */}
+              {isAdmin && (
+                <button
+                  className="delete-button"
+                  onClick={() => {
+                    handleDeleteMessage(msg.id);
+                    refreshMessages();
+                  }}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
         <div className="chat-input">
           <input
             type="text"
@@ -167,6 +207,8 @@ const Messages = ({ selectedChannel }) => {
           />
           <button onClick={handleMessageSend}>Send</button>
         </div>
+                {/* Nicole: Display send status (success or error) */}
+                {sendStatus && <div className="send-feedback">{sendStatus}</div>}
       </div>
     </>
   );

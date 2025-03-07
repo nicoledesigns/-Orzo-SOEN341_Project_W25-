@@ -28,3 +28,18 @@
   color: gray;
   text-align: right;
 }
+.delete-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: darkred;
+}
+
+.message .delete-button {
+  margin-left: 10px;
+}

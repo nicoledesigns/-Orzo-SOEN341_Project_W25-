@@ -105,6 +105,25 @@ const AdminDashboard = () => {
         alert(err.message || "Something went wrong.");
       });
   };
+//Nicole: Delete message option for Admins
+  const handleDeleteMessage = (messageId) => {
+    // Call to backend to delete message
+    fetch("http://localhost:8081/deleteMessage/${messageId}", {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Message deleted successfully!");
+        } else {
+          alert("Failed to delete message");
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting message:", err);
+        alert("Something went wrong");
+      });
+  };
 
   const handleLogout = () => {
     sessionStorage.clear();
@@ -149,7 +168,7 @@ const AdminDashboard = () => {
 
       <div className="chat-section">
         {selectedChannel ? (
-          <Messages selectedChannel={selectedChannel} />
+          <Messages selectedChannel={selectedChannel} handleDeleteMessage={handleDeleteMessage} />
         ) : (
           <p>Please select a channel to view messages.</p>
         )}
