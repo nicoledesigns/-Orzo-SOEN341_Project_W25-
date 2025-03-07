@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd orzo_chatheaven
-          npm install --legacy-peer-deps
+          npm install --force
 
       - name: Run tests
         run: |
@@ -63,12 +63,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: '21'
 
       - name: Install dependencies
         run: |
           cd orzo_chatheaven
-          npm install --legacy-peer-deps
+          npm install --force
 
       - name: Build Frontend
         run: |
