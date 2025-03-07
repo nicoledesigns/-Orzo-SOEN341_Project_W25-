@@ -1,1 +1,30 @@
+.chat-messages {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
 
+.message {
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  max-width: 80%;
+}
+
+.my-message {
+  align-self: flex-end;
+}
+
+.other-message {
+  align-self: flex-start;
+}
+
+.timestamp {
+  font-size: 0.8em;
+  color: gray;
+  text-align: right;
+}
