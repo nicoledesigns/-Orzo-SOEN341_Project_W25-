@@ -51,6 +51,7 @@ jobs:
         run: |
           cd orzo_chatheaven
           npm run start-server &
+          sleep 5
           curl http://localhost:8081/getUserChannels/1
 
   CD:
