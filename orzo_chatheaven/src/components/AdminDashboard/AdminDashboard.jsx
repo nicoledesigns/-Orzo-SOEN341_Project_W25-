@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
+import Messages from "../Messaging/Public_Chat";
 
 const AdminDashboard = () => {
   const adminName = sessionStorage.getItem("userName") || "Admin";
@@ -11,12 +12,11 @@ const AdminDashboard = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     fetch("http://localhost:8081/getChannels")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched channels:", data); 
+        console.log("Fetched channels:", data);
         setChannels(Array.isArray(data.channels) ? data.channels : []);
       })
       .catch((err) => console.error("Error fetching channels:", err));
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
     fetch("http://localhost:8081/getUsers")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched users:", data); 
+        console.log("Fetched users:", data);
         setUsers(Array.isArray(data.users) ? data.users : []);
       })
       .catch((err) => console.error("Error fetching users:", err));
@@ -47,17 +47,20 @@ const AdminDashboard = () => {
     fetch("http://localhost:8081/addUserToChannel", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ channelId: selectedChannel.id, userIds: selectedUsers }),
+      body: JSON.stringify({
+        channelId: selectedChannel.id,
+        userIds: selectedUsers,
+      }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
           alert("Users added successfully!");
-
-  
           fetch("http://localhost:8081/getChannels")
             .then((response) => response.json())
-            .then((data) => setChannels(Array.isArray(data.channels) ? data.channels : []));
+            .then((data) =>
+              setChannels(Array.isArray(data.channels) ? data.channels : [])
+            );
         } else {
           alert("Failed to add users: " + data.error);
         }
@@ -69,44 +72,50 @@ const AdminDashboard = () => {
 
   const handleAddChannel = () => {
     if (newChannel.trim() === "") {
-        alert("Channel name cannot be empty!");
-        return;
+      alert("Channel name cannot be empty!");
+      return;
     }
 
     fetch("http://localhost:8081/addChannel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newChannel }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newChannel }),
     })
-        .then((response) => {
-            if (!response.ok) {
-                return response.json().then((data) => {
-                    throw new Error(data.error || "Failed to add channel");
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
-            console.log("Add channel response:", data); 
-            if (data.message) {
-                alert("Channel added successfully!");
-                setChannels([...channels, { id: data.channelId, name: newChannel, members: [] }]);
-                setNewChannel("");
-            }
-        })
-        .catch((err) => {
-            console.error("Error adding channel:", err);
-            alert(err.message || "Something went wrong.");
-        });
-};
-
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.error || "Failed to add channel");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Add channel response:", data);
+        if (data.message) {
+          alert("Channel added successfully!");
+          setChannels([
+            ...channels,
+            { id: data.channelId, name: newChannel, members: [] },
+          ]);
+          setNewChannel("");
+        }
+      })
+      .catch((err) => {
+        console.error("Error adding channel:", err);
+        alert(err.message || "Something went wrong.");
+      });
+  };
 
   const handleLogout = () => {
     sessionStorage.clear();
     navigate("/");
   };
 
-  const currentChannel = channels.find((channel) => channel.id === selectedChannel?.id) || { name: "", members: [] };
+  const currentChannel =
+    channels.find((channel) => channel.id === selectedChannel?.id) || {
+      name: "",
+      members: [],
+    };
 
   return (
     <div className="admin-dashboard">
@@ -139,27 +148,19 @@ const AdminDashboard = () => {
       </div>
 
       <div className="chat-section">
-        <div className="chat-header">
-          <h3>#{currentChannel.name}</h3>
-          <p>{currentChannel.members?.length || 0} Members</p>
-        </div>
-        <div className="chat-messages">
-          <div className="message">
-            <strong>Houda:</strong> Hi everyone! Welcome to the {currentChannel.name} channel.
-          </div>
-          <div className="message">
-            <strong>Eesha:</strong> Looking forward to discussing!
-          </div>
-        </div>
-        <div className="chat-input">
-          <input type="text" placeholder="Type a message..." />
-          <button>Send</button>
-        </div>
+        {selectedChannel ? (
+          <Messages selectedChannel={selectedChannel} />
+        ) : (
+          <p>Please select a channel to view messages.</p>
+        )}
       </div>
 
       <div className="profile-section">
         <h3>{currentChannel.name}</h3>
-        <p>Description: This is your space to collaborate and discuss all things {currentChannel.name}-related.</p>
+        <p>
+          Description: This is your space to collaborate and discuss all things{" "}
+          {currentChannel.name}-related.
+        </p>
         <h4>Members</h4>
         <ul>
           {currentChannel.members?.map((member, index) => (
