@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserDashboard.css";
+import Messages from "../Messaging/Public_Chat";
 
 const UserDashboard = () => {
   const [channels, setChannels] = useState([]);
@@ -9,13 +10,14 @@ const UserDashboard = () => {
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
-  
+
     if (!userId) {
       alert("User not logged in!");
       navigate("/");
       return;
     }
-  
+
+    // Fetch channels for the logged-in user
     fetch(`http://localhost:8081/getUserChannels/${userId}`)
       .then((response) => response.json())
       .then((data) => {
@@ -30,14 +32,14 @@ const UserDashboard = () => {
       })
       .catch((err) => console.error("Error fetching user channels:", err));
   }, [navigate]);
-  
 
   const handleLogout = () => {
     sessionStorage.clear();
     navigate("/");
   };
 
-  const currentChannel = selectedChannel || { name: "No channels available", members: [] };
+  const currentChannel =
+    selectedChannel || { name: "No channels available", members: [] };
 
   return (
     <div className="user-dashboard">
@@ -62,28 +64,10 @@ const UserDashboard = () => {
       </div>
 
       <div className="chat-section">
-        {channels.length > 0 ? (
-          <>
-            <div className="chat-header">
-              <h3>#{currentChannel.name}</h3>
-            </div>
-            <div className="chat-messages">
-              <div className="message">
-                <strong>Houda:</strong> Hi everyone! Welcome to the {currentChannel.name} channel.
-              </div>
-              <div className="message">
-                <strong>Eesha:</strong> Looking forward to discussing!
-              </div>
-            </div>
-            <div className="chat-input">
-              <input type="text" placeholder="Type a message..." />
-              <button>Send</button>
-            </div>
-          </>
+        {selectedChannel ? (
+          <Messages selectedChannel={selectedChannel} />
         ) : (
-          <div className="no-channels">
-            <p>No channels available to display. Please contact the admin.</p>
-          </div>
+          <p>Please select a channel to view messages.</p>
         )}
       </div>
 
@@ -91,7 +75,10 @@ const UserDashboard = () => {
         {channels.length > 0 ? (
           <>
             <h3>{currentChannel.name}</h3>
-            <p>Description: This is your space to collaborate and discuss all things {currentChannel.name}-related.</p>
+            <p>
+              Description: This is your space to collaborate and discuss all things{" "}
+              {currentChannel.name}-related.
+            </p>
           </>
         ) : (
           <div className="no-channels">
