@@ -18,7 +18,7 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
   const userId = sessionStorage.getItem("userId");
   const userName = sessionStorage.getItem("userName");
   // Check if the current user is an admin for deleting a message
-  const isAdmin = userName === "Admin";
+  //const isAdmin = userName === "Admin";
 
 
   // Fetch messages when the selected channel changes or after sending a new message.
@@ -154,7 +154,9 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
           color: gray;
           text-align: right;
         }
+
       `}</style>
+
       <div className="chat-section">
         <div className="chat-header">
           <h3>#{selectedChannel.name}</h3>
@@ -162,6 +164,7 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
         </div>
         <div className="chat-messages">
           {messages.map((msg, index) => {
+            const isAdmin = userId === "7"; // check if userID correspond to an ADMIN
             const alignmentClass = (String(msg.userId) === String(userId)) ? "my-message" : "other-message";
             return (
               <div
@@ -183,17 +186,22 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
                 {msg.message}
                 <div className="timestamp">{msg.time}</div>
                   {/* Show delete button only if the message is from Admin */}
-              {isAdmin && (
-                <button
-                  className="delete-button"
-                  onClick={() => {
-                    handleDeleteMessage(msg.id);
-                    refreshMessages();
-                  }}
-                >
-                  Delete
-                </button>
-              )}
+                  {isAdmin && (
+  <button
+    className="delete-button"
+    onClick={async () => {
+      try {
+        // Ensure you're passing the correct channelId
+        await handleDeleteMessage(selectedChannel.id, userId, msg.message, msg.time);
+        refreshMessages(); // Refresh messages after deletion
+      } catch (err) {
+        console.error("Error deleting message:", err);
+      }
+    }}
+  >
+    Delete
+  </button>
+)}
             </div>
           );
         })}

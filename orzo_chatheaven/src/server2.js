@@ -287,41 +287,70 @@ app.get("/loadMessages/:channelId", (req, res) => {
   });
 });
 
+//isAdmin is not working!! 
+const isAdmin = (userId) => {
+  const adminUsers = ["7"];
+  return adminUsers.includes(String(userId).trim());
+};
 
-app.delete("/deleteMessage/:channelId/:userId/:message/:time", (req, res) => {
-  const { channelId, userId, message, time } = req.params;
-  if (!channelId || !userId || !message || !time) {
+// DELETE route for deleting a message by admin
+app.delete("/deleteMessage", (req, res) => {
+  const { userId, channelId, message, time } = req.body;
+  if (!userId || !channelId || !message || !time) {
     return res.status(400).json({ error: "Invalid input!" });
   }
-  const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
-
-  if (!isAdmin || !isAdmin(userId)) {
+  // Check if the user is an admin
+  if (!isAdmin(userId)) {
     return res.status(403).json({ error: "Not authorized" });
   }
+
+  const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
+
+  // Read the file where the messages are stored
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
+      console.error("Error reading file:", err);
       return res.status(500).json({ error: "Failed to read file" });
     }
+
+    // Split file into lines and parse each message
     const messages = data.split("\n").map(line => {
       const [msgUserId, msg, msgTime] = line.split(";");
       return { msgUserId, msg, msgTime };
     });
+
+    // Find the index of the message to delete
     const index = messages.findIndex(
       msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time
     );
+
     if (index === -1) {
+      console.log("Message not found:", { userId, message, time });
       return res.status(404).json({ error: "Message not found" });
     }
+
+    // Remove the message from the list
     messages.splice(index, 1);
-    const newContent = messages.map(msg => `${msg.msgUserId};${msg.msg};${msg.msgTime}`).join("\n");
+
+    // Prepare the new content of the file
+    const newContent = messages
+      .map(msg => `${msg.msgUserId};${encodeURIComponent(msg.msg)};${msg.msgTime}`)
+      .join("\n");
+
+    // Write the updated content back to the file
     fs.writeFile(filePath, newContent, (err) => {
       if (err) {
+        console.error("Error writing file:", err);
         return res.status(500).json({ error: "Failed to write file" });
       }
-      res.status(200).json({ message: "Message deleted successfully" });
+
+      console.log("Message deleted successfully!");
+      return res.status(200).json({ message: "Message deleted successfully" });
     });
   });
 });
+
+
 
 // Start the server
 app.listen(8081, () => {

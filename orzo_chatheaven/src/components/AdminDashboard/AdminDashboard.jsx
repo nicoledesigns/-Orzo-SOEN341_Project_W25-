@@ -106,24 +106,39 @@ const AdminDashboard = () => {
       });
   };
 //Nicole: Delete message option for Admins
-  const handleDeleteMessage = (messageId) => {
-    // Call to backend to delete message
-    fetch("http://localhost:8081/deleteMessage/${messageId}", {
-      method: "DELETE",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Message deleted successfully!");
-        } else {
-          alert("Failed to delete message");
-        }
-      })
-      .catch((err) => {
-        console.error("Error deleting message:", err);
-        alert("Something went wrong");
-      });
+const handleDeleteMessage = (channelId, userId, message, time) => {
+  console.log("Logged in user ID: ", userId); // Log the user ID
+
+  // Prepare the request body
+  const requestBody = {
+    userId,    // Pass the userId as part of the body
+    channelId, // Pass the channelId as part of the body
+    message,   // Pass the message to delete as part of the body
+    time       // Pass the time of the message to delete as part of the body
   };
+
+  fetch("http://localhost:8081/deleteMessage", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(requestBody)  // Send the data as JSON in the body
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        alert("Message deleted successfully!");
+      } else {
+        alert("Failed to delete message: " + (data.error || "Unknown error"));
+      }
+    })
+    .catch((err) => {
+      console.error("Error deleting message:", err);
+      alert("Something went wrong");
+    });
+};
+
+
 
   const handleLogout = () => {
     sessionStorage.clear();
