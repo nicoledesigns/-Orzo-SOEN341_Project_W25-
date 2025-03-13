@@ -187,20 +187,29 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
                 <div className="timestamp">{msg.time}</div>
                   {/* Show delete button only if the message is from Admin */}
                   {isAdmin && (
-  <button
-    className="delete-button"
-    onClick={async () => {
-      try {
-        // Ensure you're passing the correct channelId
-        await handleDeleteMessage(selectedChannel.id, userId, msg.message, msg.time);
-        refreshMessages(); // Refresh messages after deletion
-      } catch (err) {
-        console.error("Error deleting message:", err);
-      }
-    }}
-  >
-    Delete
-  </button>
+                    <button
+  className="delete-button"
+  onClick={async () => {
+    try {
+      // Optimistically remove the message from UI first
+      setMessages(prevMessages =>
+        prevMessages.filter(m => !(m.message === msg.message && m.time === msg.time))
+      );
+
+      // Wait for delete request to complete
+      await handleDeleteMessage(selectedChannel.id, userId, msg.message, msg.time);
+      
+      // Fetch updated messages to ensure backend consistency
+      setTimeout(refreshMessages, 500); // Small delay to allow backend to update
+
+    } catch (err) {
+      console.error("Error deleting message:", err);
+    }
+  }}
+>
+  Delete
+</button>
+
 )}
             </div>
           );
