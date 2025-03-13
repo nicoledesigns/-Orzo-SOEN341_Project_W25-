@@ -226,7 +226,7 @@ app.post("/sendMessage", (req, res) => {
   const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
   const date = new Date();
   const formattedDate = formatDate(date);
-  const formattedMessage = `${userId};${message};${formattedDate}\n`;
+  const formattedMessage = `\n${userId};${message};${formattedDate}`;
   fs.appendFile(filePath, formattedMessage, (err) => {
     if (err) {
       console.error("Failed to send message:", err);
@@ -312,16 +312,22 @@ app.delete("/deleteMessage", (req, res) => {
       console.error("Error reading file:", err);
       return res.status(500).json({ error: "Failed to read file" });
     }
-
-    // Split file into lines and parse each message
-    const messages = data.split("\n").map(line => {
+    //1 Split, file into lines and parse each message
+    const messages = data.split(/\r?\n/).map(line => {
+      console.log(`this is the line : ${line}`)
+      if (line === "") {
+        return null;
+      }
       const [msgUserId, msg, msgTime] = line.split(";");
+      console.log(`this is the array ${[msgUserId, msg, msgTime]}`)
       return { msgUserId, msg, msgTime };
-    });
+    }).filter(Boolean);
+
 
     // Find the index of the message to delete
     const index = messages.findIndex(
-      msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time
+      // msg => msg.msgUserId === userId && msg.msg === message && msg.msgTime === time
+      msg => msg.msg === message && msg.msgTime === time
     );
 
     if (index === -1) {
@@ -332,10 +338,11 @@ app.delete("/deleteMessage", (req, res) => {
     // Remove the message from the list
     messages.splice(index, 1);
 
-    // Prepare the new content of the file
+    //Prepare the new content of the file
     const newContent = messages
-      .map(msg => `${msg.msgUserId};${encodeURIComponent(msg.msg)};${msg.msgTime}`)
+      .map(msg => `${msg.msgUserId};${msg.msg};${msg.msgTime}`)
       .join("\n");
+    console.log(newContent)
 
     // Write the updated content back to the file
     fs.writeFile(filePath, newContent, (err) => {
