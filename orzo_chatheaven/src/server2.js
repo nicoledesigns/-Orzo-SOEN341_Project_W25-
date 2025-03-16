@@ -357,6 +357,26 @@ app.delete("/deleteMessage", (req, res) => {
   });
 });
 
+//Logic for direct messaging between users
+app.post("/sendDirectMessage", (req, res) => {
+  const { senderId, receiverId, message } = req.body;
+  if (!senderId || !receiverId || !message) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+  const filePath = path.join(__dirname, 'db', `@${senderId}-${receiverId}.txt`);
+  const date = new Date();
+  const formattedDate = formatDate(date);
+  const formattedMessage = `\n${senderId};${message};${formattedDate}`;
+  fs.appendFile(filePath, formattedMessage, (err) => {
+    if (err) {
+      console.error("Failed to send message:", err);
+      return res.status(500).json({ error: "Failed to send message" });
+    }
+    console.log("Message sent:", formattedMessage);
+    return res.status(200).json({ message: "Message sent successfully" });
+  });
+});
+
 
 
 // Start the server
