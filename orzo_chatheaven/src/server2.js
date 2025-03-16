@@ -357,23 +357,30 @@ app.delete("/deleteMessage", (req, res) => {
   });
 });
 
-//Logic for direct messaging between users
-app.post("/sendDirectMessage", (req, res) => {
-  const { senderId, receiverId, message } = req.body;
-  if (!senderId || !receiverId || !message) {
-    return res.status(400).json({ error: "Invalid input!" });
+// Logic for direct messaging between users 
+app.post("/sendDirectMessage", (req, res) => { // Define a POST route for sending direct messages
+  const { senderId, receiverId, message } = req.body; // Extract senderId, receiverId, and message from the request body
+
+  if (!senderId || !receiverId || !message) { // Check if any of the required fields are missing
+    return res.status(400).json({ error: "Invalid input!" }); // Return a 400 error if any field is missing
   }
-  const filePath = path.join(__dirname, 'db', `@${senderId}-${receiverId}.txt`);
-  const date = new Date();
-  const formattedDate = formatDate(date);
-  const formattedMessage = `\n${senderId};${message};${formattedDate}`;
-  fs.appendFile(filePath, formattedMessage, (err) => {
-    if (err) {
-      console.error("Failed to send message:", err);
-      return res.status(500).json({ error: "Failed to send message" });
+  //mixing the senderId and receiverId to create a unique file name
+  const sortedUsers = [senderId, receiverId].sort().join("--"); // Sort the user IDs to maintain consistency in file naming
+  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`); // Define the file path for storing the message
+
+
+  
+  const formattedDate = new Date().toISOString();// Format the date
+  const formattedMessage = `\n${senderId};${message};${formattedDate}`; // Format the message to be stored
+
+  // error handeling
+  fs.appendFile(filePath, formattedMessage, (err) => { // Append the message to the file
+    if (err) { // Check for errors during file writing
+      console.error("Failed to send message:", err); // Log the error
+      return res.status(500).json({ error: "Failed to send message" }); // Return a 500 error if file writing fails
     }
-    console.log("Message sent:", formattedMessage);
-    return res.status(200).json({ message: "Message sent successfully" });
+    console.log("Message sent:", formattedMessage); // Log the successful message sending
+    return res.status(200).json({ message: "Message sent successfully" }); // Return a success response
   });
 });
 
