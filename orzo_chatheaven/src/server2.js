@@ -384,6 +384,66 @@ app.post("/sendDirectMessage", (req, res) => { // Define a POST route for sendin
   });
 });
 
+// Logic for loading direct messages between users
+app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a GET route for loading direct messages
+  const { senderId, receiverId } = req.params; // Extract senderId and receiverId from URL parameters
+
+  if (!senderId || !receiverId) { // Check if senderId or receiverId is missing
+    return res.status(400).json({ error: "Invalid input!" }); // Return a 400 error if any field is missing
+  }
+
+  const sortedUsers = [senderId, receiverId].sort().join("--"); // Sort the user IDs to maintain consistency in file naming
+  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`); // Define the file path for storing the message
+
+  fs.readFile(filePath, "utf8", (err, data) => { // Read the file where the messages are stored
+    if (err) { // Check for errors during file reading
+      console.error("Error reading file:", err); // Log the error
+      return res.status(500).json({ error: "Failed to read file" }); // Return a 500 error if file reading fails
+    }
+
+    const lines = data.split("\n").filter(line => line.trim() !== ""); // Split file into lines and filter out empty lines
+
+    const messages = lines.map(line => { // Map each line to a message object
+      const parts = line.split(";"); // Split the line into parts
+      return {
+        userId: (parts[0] || "").trim(), // Extract userId
+        message: (parts[1] || "").trim(), // Extract message
+        time: (parts[2] || "").trim() // Extract time
+      };
+    });
+
+    const userIds = [...new Set(messages.map(msg => msg.userId))]; // Get unique user IDs from messages
+
+    if (userIds.length === 0) { // Check if there are no user IDs
+      return res.status(200).json({ enrichedMessages: [] }); // Return an empty array if no user IDs
+    }
+    //check if this works for the database
+    const placeholders = userIds.map(() => "?").join(","); // Create placeholders for SQL query
+    const sql = `SELECT id, name FROM users WHERE id IN (${placeholders})`; // Define SQL query to fetch user names
+
+    db.query(sql, userIds, (dbErr, users) => { // Execute SQL query
+      if (dbErr) { // Check for errors during SQL query execution
+        console.error("Error fetching user info:", dbErr); // Log the error
+        return res.status(500).json({ error: "Failed to fetch user information" }); // Return a 500 error if SQL query fails
+      }
+
+      const userMap = users.reduce((acc, user) => { // Create a map of user IDs to user names
+        acc[user.id] = user.name; // Map user ID to user name
+        return acc;
+      }, {});
+
+      const enrichedMessages = messages.map(msg => ({ // Map each message to an enriched message object
+        userId: msg.userId, // Add userId to enriched message
+        userName: userMap[msg.userId] || msg.userId, // Add userName to enriched message
+        message: msg.message, // Add message to enriched message
+        time: msg.time // Add time to enriched message
+      }));
+
+      return res.status(200).json({ enrichedMessages }); // Return enriched messages
+    });
+  });
+});
+
 
 
 // Start the server
