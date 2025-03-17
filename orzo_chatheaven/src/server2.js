@@ -434,7 +434,7 @@ app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a
 
       const enrichedMessages = messages.map(msg => ({ // Map each message to an enriched message object
         userId: msg.userId, // Add userId to enriched message
-        userName: userMap[msg.userId] || msg.userId, // Add userName to enriched message
+        userName: userMap[msg.userId] || msg.userId, // Add userName to enriched message 
         message: msg.message, // Add message to enriched message
         time: msg.time // Add time to enriched message
       }));
