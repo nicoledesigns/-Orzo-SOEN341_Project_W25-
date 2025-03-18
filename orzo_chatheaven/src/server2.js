@@ -468,8 +468,24 @@ app.post("/requestToJoinChannel", (req, res) => {
     return res.status(400).json({ error: "Invalid input!" });
   }
 
-  const sql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
-  db.run(sql, [userId, channelId], function (err) {
+  const checkRequestSql = "SELECT * FROM channel_requests WHERE user_id = ? AND channel_id = ?";
+  
+  db.get(checkRequestSql, [userId, channelId], (err, row) => {
+    if (err) {
+      console.error("Error checking request:", err);
+      return res.status(500).json({ error: "Failed to request to join channel" });
+    }
+
+    if (row) {
+      console.log("Request already exists:", row);
+      return res.status(400).json({ error: "Request already exists" });
+    }
+
+    insertRequest(userId, channelId, res);
+  });
+
+  const insertSql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
+  db.run(insertSql, [userId, channelId], function (err) {
     if (err) {
       console.error("Error requesting to join channel:", err);
       return res.status(500).json({ error: "Failed to request to join channel" });
