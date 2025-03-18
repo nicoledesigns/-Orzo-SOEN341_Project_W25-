@@ -469,7 +469,7 @@ app.post("/requestToJoinChannel", (req, res) => {
   }
 
   const checkRequestSql = "SELECT * FROM channel_requests WHERE user_id = ? AND channel_id = ?";
-  
+
   db.get(checkRequestSql, [userId, channelId], (err, row) => {
     if (err) {
       console.error("Error checking request:", err);
@@ -481,7 +481,7 @@ app.post("/requestToJoinChannel", (req, res) => {
       return res.status(400).json({ error: "Request already exists" });
     }
 
-    insertRequest(userId, channelId, res);
+  
   });
 
   const insertSql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
