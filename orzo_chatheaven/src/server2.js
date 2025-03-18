@@ -460,20 +460,19 @@ app.post("/leaveChannel", (req, res) => {
   });
 });
 
-
 //requesting to join a channel
 app.post("/requestToJoinChannel", (req, res) => {
   const { userId, channelId } = req.body;
   if (!userId || !channelId) {
     return res.status(400).json({ error: "Invalid input!" });
   }
-
+  //check already made requests 
   const checkRequestSql = "SELECT * FROM channel_requests WHERE user_id = ? AND channel_id = ?";
-
+  
   db.get(checkRequestSql, [userId, channelId], (err, row) => {
     if (err) {
       console.error("Error checking request:", err);
-      return res.status(500).json({ error: "Failed to request to join channel" });
+      return res.status(500).json({ error: "Failed to check request" });
     }
 
     if (row) {
@@ -481,20 +480,19 @@ app.post("/requestToJoinChannel", (req, res) => {
       return res.status(400).json({ error: "Request already exists" });
     }
 
-  
-  });
-
-  const insertSql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
-  db.run(insertSql, [userId, channelId], function (err) {
-    if (err) {
-      console.error("Error requesting to join channel:", err);
-      return res.status(500).json({ error: "Failed to request to join channel" });
-    }
-    console.log("User requested to join channel:", userId, channelId);
-    return res.status(200).json({ message: "Request sent successfully" });
+    // Insert request if none found
+    const insertSql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
+    
+    db.run(insertSql, [userId, channelId], function (err) {
+      if (err) {
+        console.error("Error requesting to join channel:", err);
+        return res.status(500).json({ error: "Failed to request to join channel" });
+      }
+      console.log("User requested to join channel:", userId, channelId);
+      return res.status(200).json({ message: "Request sent successfully" });
+    });
   });
 });
-
 
 
 // Start the server
