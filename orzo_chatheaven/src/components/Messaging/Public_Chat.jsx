@@ -52,7 +52,6 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
     setUserColors(newMapping);
   }, [messages]);
 
-
   // Nicole: State for sending status (success or error)
   const [sendStatus, setSendStatus] = useState(""); 
 
@@ -191,7 +190,6 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
   className="delete-button"
   onClick={async () => {
     try {
-      // Optimistically remove the message from UI first
       setMessages(prevMessages =>
         prevMessages.filter(m => !(m.message === msg.message && m.time === msg.time))
       );
