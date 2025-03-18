@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserDashboard.css";
 import Messages from "../Messaging/Public_Chat";
+import UserList from "../DirectMessaging/UserList";
+import DirectMessaging from "../DirectMessaging/DirectMessaging";
+
 
 const UserDashboard = () => {
   const [channels, setChannels] = useState([]);
