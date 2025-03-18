@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 import Messages from "../Messaging/Public_Chat";
+import UserList from "../DirectMessaging/UserList";
+import DirectMessaging from "../DirectMessaging/DirectMessaging";
 
 const AdminDashboard = () => {
   const adminName = sessionStorage.getItem("userName") || "Admin";
@@ -10,6 +12,10 @@ const AdminDashboard = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [showUserList, setShowUserList] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserName, setSelectedUserName] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,44 +111,46 @@ const AdminDashboard = () => {
         alert(err.message || "Something went wrong.");
       });
   };
-//Nicole: Delete message option for Admins
-const handleDeleteMessage = (channelId, userId, message, time) => {
-  console.log("Logged in user ID: ", userId); // Log the user ID
 
-  // Prepare the request body
-  const requestBody = {
-    userId,    // Pass the userId as part of the body
-    channelId, // Pass the channelId as part of the body
-    message,   // Pass the message to delete as part of the body
-    time       // Pass the time of the message to delete as part of the body
-  };
+  const handleDeleteMessage = (channelId, userId, message, time) => {
+    const requestBody = {
+      userId,
+      channelId,
+      message,
+      time,
+    };
 
-  fetch("http://localhost:8081/deleteMessage", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestBody)  // Send the data as JSON in the body
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.message) {
-        alert("Message deleted successfully!");
-      } else {
-        alert("Failed to delete message: " + (data.error || "Unknown error"));
-      }
+    fetch("http://localhost:8081/deleteMessage", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     })
-    .catch((err) => {
-      console.error("Error deleting message:", err);
-      alert("Something went wrong");
-    });
-};
-
-
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          alert("Message deleted successfully!");
+        } else {
+          alert("Failed to delete message: " + (data.error || "Unknown error"));
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting message:", err);
+        alert("Something went wrong");
+      });
+  };
 
   const handleLogout = () => {
     sessionStorage.clear();
     navigate("/");
+  };
+
+  // Called when a user is selected from the DM user list
+  const handleUserSelect = (userId, userName) => {
+    setSelectedUserId(userId);
+    setSelectedUserName(userName);
+    setShowUserList(false);
   };
 
   const currentChannel =
@@ -176,6 +184,11 @@ const handleDeleteMessage = (channelId, userId, message, time) => {
           />
           <button onClick={handleAddChannel}>Add</button>
         </div>
+
+        <button onClick={() => setShowUserList(!showUserList)}>
+          {showUserList ? "Hide User List" : "Start a Direct Message"}
+        </button>
+
         <button className="logout-button" onClick={handleLogout}>
           Logout
         </button>
@@ -183,9 +196,42 @@ const handleDeleteMessage = (channelId, userId, message, time) => {
 
       <div className="chat-section">
         {selectedChannel ? (
-          <Messages selectedChannel={selectedChannel} handleDeleteMessage={handleDeleteMessage} />
+          <div className="channel-chat-container">
+            <div className="channel-chat-header">
+              <h2>#{selectedChannel.name}</h2>
+              <button
+                className="close-button"
+                onClick={() => setSelectedChannel(null)}
+              >
+                X
+              </button>
+            </div>
+            <Messages
+              selectedChannel={selectedChannel}
+              handleDeleteMessage={handleDeleteMessage}
+            />
+          </div>
         ) : (
           <p>Please select a channel to view messages.</p>
+        )}
+
+        {showUserList && (
+          <UserList
+            currentUserId={sessionStorage.getItem("userId")}
+            onUserSelect={handleUserSelect}
+          />
+        )}
+
+        {selectedUserId && (
+          <DirectMessaging
+            currentUserId={sessionStorage.getItem("userId")}
+            receiverId={selectedUserId}
+            receiverName={selectedUserName}
+            onClose={() => {
+              setSelectedUserId(null);
+              setSelectedUserName("");
+            }}
+          />
         )}
       </div>
 
@@ -204,7 +250,8 @@ const handleDeleteMessage = (channelId, userId, message, time) => {
           ))}
         </ul>
         <h4>Add Users to Channel</h4>
-        <div className="user-selection">
+
+        <div className="user-selection" style={{ maxHeight: "200px", overflowY: "auto" }}>
           {users.map((user) => (
             <div key={user.id} className="user-checkbox">
               <input
@@ -217,6 +264,7 @@ const handleDeleteMessage = (channelId, userId, message, time) => {
             </div>
           ))}
         </div>
+
         <button onClick={handleAddUsersToChannel}>Add Selected Users</button>
       </div>
     </div>
