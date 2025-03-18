@@ -441,6 +441,25 @@ app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => {
   });
 });
 
+//logic for leaving a channel
+app.post("/leaveChannel", (req, res) => {
+  const { userId, channelId } = req.body;
+  if (!userId || !channelId) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+
+  const sql = "DELETE FROM channel_members WHERE user_id = ? AND channel_id = ?";
+  db.run(sql, [userId, channelId], function (err) {
+    if (err) {
+      console.error("Error leaving channel:", err);
+      return res.status(500).json({ error: "Failed to leave channel" });
+    }
+    console.log("User left channel:", userId, channelId);
+    return res.status(200).json({ message: "User left channel successfully" });
+  });
+});
+
+
 // Start the server
 app.listen(8081, () => {
   console.log("Server is listening on http://localhost:8081");
