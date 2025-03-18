@@ -232,7 +232,7 @@ app.post("/sendMessage", (req, res) => {
       console.error("Failed to send message:", err);
       return res.status(500).json({ error: "Failed to send message" });
     }
-    console.log("DM:", formattedMessage);
+    console.log("Message sent:", formattedMessage);
     return res.status(200).json({ message: "Message sent successfully" });
   });
 });
@@ -357,45 +357,42 @@ app.delete("/deleteMessage", (req, res) => {
   });
 });
 
-// Logic for direct messaging between users 
-app.post("/sendDirectMessage", (req, res) => { // Define a POST route for sending direct messages
-  const { senderId, receiverId, message } = req.body; // Extract senderId, receiverId, and message from the request body
-
-  if (!senderId || !receiverId || !message) { // Check if any of the required fields are missing
-    return res.status(400).json({ error: "Invalid input!" }); // Return a 400 error if any field is missing
+// POST route for sending direct messages
+app.post("/sendDirectMessage", (req, res) => {
+  const { senderId, receiverId, message } = req.body;
+  if (!senderId || !receiverId || !message) {
+    return res.status(400).json({ error: "Invalid input!" });
   }
-  //mixing the senderId and receiverId to create a unique file name
-  const sortedUsers = [senderId, receiverId].sort().join("--"); // Sort the user IDs to maintain consistency in file naming
-  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`); // Define the file path for storing the message
 
+  // Sort IDs so the same file is always used for the same two users
+  const sortedUsers = [senderId, receiverId].sort().join("--");
+  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`);
 
-  
-  const formattedDate = new Date().toISOString();// Format the date
-  const formattedMessage = `\n${senderId};${message};${formattedDate}`; // Format the message to be stored
+  const formattedDate = new Date().toISOString();
+  const formattedMessage = `\n${senderId};${message};${formattedDate}`;
 
-  // error handeling
-  fs.appendFile(filePath, formattedMessage, (err) => { // Append the message to the file
-    if (err) { // Check for errors during file writing
-      console.error("Failed to send message:", err); // Log the error
-      return res.status(500).json({ error: "Failed to send message" }); // Return a 500 error if file writing fails
+  fs.appendFile(filePath, formattedMessage, (err) => {
+    if (err) {
+      console.error("Failed to send message:", err);
+      return res.status(500).json({ error: "Failed to send message" });
     }
-    console.log("DM sent:", formattedMessage); // Log the successful message sending
-    return res.status(200).json({ message: "Message sent successfully" }); // Return a success response
+    console.log("DM sent:", formattedMessage);
+    return res.status(200).json({ message: "Message sent successfully" });
   });
 });
 
-// Logic for loading direct messages between users
-app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a GET route for loading direct messages
-  const { senderId, receiverId } = req.params; // Extract senderId and receiverId from URL parameters
-
-  if (!senderId || !receiverId) { // Check if senderId or receiverId is missing
-    return res.status(400).json({ error: "Invalid input!" }); // Return a 400 error if any field is missing
+// GET route for loading direct messages between users
+app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => {
+  const { senderId, receiverId } = req.params;
+  if (!senderId || !receiverId) {
+    return res.status(400).json({ error: "Invalid input!" });
   }
 
-  const sortedUsers = [senderId, receiverId].sort().join("--"); // Sort the user IDs to maintain consistency in file naming
-  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`); // Define the file path for storing the message
+  const sortedUsers = [senderId, receiverId].sort().join("--");
+  const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`);
 
   fs.readFile(filePath, "utf8", (err, data) => {
+    // If file doesn't exist yet or is empty, return empty array
     if (err && err.code === "ENOENT") {
       return res.status(200).json({ enrichedMessages: [] });
     } else if (err) {
@@ -403,50 +400,46 @@ app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a
       return res.status(500).json({ error: "Failed to read file" });
     }
 
-    const lines = data.split("\n").filter(line => line.trim() !== ""); // Split file into lines and filter out empty lines
-
-    const messages = lines.map(line => { // Map each line to a message object
-      const parts = line.split(";"); // Split the line into parts
+    const lines = data.split("\n").filter(line => line.trim() !== "");
+    const messages = lines.map(line => {
+      const parts = line.split(";");
       return {
-        userId: (parts[0] || "").trim(), // Extract userId
-        message: (parts[1] || "").trim(), // Extract message
-        time: (parts[2] || "").trim() // Extract time
+        userId: (parts[0] || "").trim(),
+        message: (parts[1] || "").trim(),
+        time: (parts[2] || "").trim()
       };
     });
 
-    const userIds = [...new Set(messages.map(msg => msg.userId))]; // Get unique user IDs from messages
-
-    if (userIds.length === 0) { // Check if there are no user IDs
-      return res.status(200).json({ enrichedMessages: [] }); // Return an empty array if no user IDs
+    const userIds = [...new Set(messages.map(msg => msg.userId))];
+    if (userIds.length === 0) {
+      return res.status(200).json({ enrichedMessages: [] });
     }
-    //check if this works for the database
-    const placeholders = userIds.map(() => "?").join(","); // Create placeholders for SQL query
-    const sql = `SELECT id, name FROM users WHERE id IN (${placeholders})`; // Define SQL query to fetch user names
 
-    db.all(sql, userIds, (dbErr, rows) => {  // Execute SQL query
-      if (dbErr) { // Check for errors during SQL query execution
-        console.error("Error fetching user info:", dbErr); // Log the error
-        return res.status(500).json({ error: "Failed to fetch user information" }); // Return a 500 error if SQL query fails
+    const placeholders = userIds.map(() => "?").join(",");
+    const sql = `SELECT id, name FROM users WHERE id IN (${placeholders})`;
+
+    db.all(sql, userIds, (dbErr, rows) => {
+      if (dbErr) {
+        console.error("Error fetching user info:", dbErr);
+        return res.status(500).json({ error: "Failed to fetch user information" });
       }
 
-      const userMap = rows.reduce((acc, user) => { // Create a map of user IDs to user names
-        acc[user.id] = user.name; // Map user ID to user name
+      const userMap = rows.reduce((acc, user) => {
+        acc[user.id] = user.name;
         return acc;
       }, {});
 
-      const enrichedMessages = messages.map(msg => ({ // Map each message to an enriched message object
-        userId: msg.userId, // Add userId to enriched message
-        userName: userMap[msg.userId] || msg.userId, // Add userName to enriched message 
-        message: msg.message, // Add message to enriched message
-        time: msg.time // Add time to enriched message
+      const enrichedMessages = messages.map(msg => ({
+        userId: msg.userId,
+        userName: userMap[msg.userId] || msg.userId,
+        message: msg.message,
+        time: msg.time
       }));
 
-      return res.status(200).json({ enrichedMessages }); // Return enriched messages
+      return res.status(200).json({ enrichedMessages });
     });
   });
 });
-
-
 
 // Start the server
 app.listen(8081, () => {
