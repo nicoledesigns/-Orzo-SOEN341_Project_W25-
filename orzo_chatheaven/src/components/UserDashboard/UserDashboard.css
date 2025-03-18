@@ -166,3 +166,52 @@
       opacity: 0;
     }
   }
+
+
+  .sidebar h3 {
+    margin-bottom: 15px;
+    color: #5371ff;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #e9e9e9;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sidebar li.active,
+  .sidebar li:hover {
+    background-color: #d4d4d4;
+  }
+
+  .channel-chat-container {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .channel-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #555;
+  }
+  
