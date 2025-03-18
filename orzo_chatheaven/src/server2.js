@@ -232,7 +232,7 @@ app.post("/sendMessage", (req, res) => {
       console.error("Failed to send message:", err);
       return res.status(500).json({ error: "Failed to send message" });
     }
-    console.log("Message sent:", formattedMessage);
+    console.log("DM:", formattedMessage);
     return res.status(200).json({ message: "Message sent successfully" });
   });
 });
@@ -379,7 +379,7 @@ app.post("/sendDirectMessage", (req, res) => { // Define a POST route for sendin
       console.error("Failed to send message:", err); // Log the error
       return res.status(500).json({ error: "Failed to send message" }); // Return a 500 error if file writing fails
     }
-    console.log("Message sent:", formattedMessage); // Log the successful message sending
+    console.log("DM sent:", formattedMessage); // Log the successful message sending
     return res.status(200).json({ message: "Message sent successfully" }); // Return a success response
   });
 });
@@ -395,10 +395,12 @@ app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a
   const sortedUsers = [senderId, receiverId].sort().join("--"); // Sort the user IDs to maintain consistency in file naming
   const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`); // Define the file path for storing the message
 
-  fs.readFile(filePath, "utf8", (err, data) => { // Read the file where the messages are stored
-    if (err) { // Check for errors during file reading
-      console.error("Error reading file:", err); // Log the error
-      return res.status(500).json({ error: "Failed to read file" }); // Return a 500 error if file reading fails
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err && err.code === "ENOENT") {
+      return res.status(200).json({ enrichedMessages: [] });
+    } else if (err) {
+      console.error("Error reading file:", err);
+      return res.status(500).json({ error: "Failed to read file" });
     }
 
     const lines = data.split("\n").filter(line => line.trim() !== ""); // Split file into lines and filter out empty lines
@@ -421,13 +423,13 @@ app.get("/loadDirectMessages/:senderId/:receiverId", (req, res) => { // Define a
     const placeholders = userIds.map(() => "?").join(","); // Create placeholders for SQL query
     const sql = `SELECT id, name FROM users WHERE id IN (${placeholders})`; // Define SQL query to fetch user names
 
-    db.query(sql, userIds, (dbErr, users) => { // Execute SQL query
+    db.all(sql, userIds, (dbErr, rows) => {  // Execute SQL query
       if (dbErr) { // Check for errors during SQL query execution
         console.error("Error fetching user info:", dbErr); // Log the error
         return res.status(500).json({ error: "Failed to fetch user information" }); // Return a 500 error if SQL query fails
       }
 
-      const userMap = users.reduce((acc, user) => { // Create a map of user IDs to user names
+      const userMap = rows.reduce((acc, user) => { // Create a map of user IDs to user names
         acc[user.id] = user.name; // Map user ID to user name
         return acc;
       }, {});
