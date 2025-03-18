@@ -50,8 +50,8 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
       }
     });
     setUserColors(newMapping);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
+
 
   // Nicole: State for sending status (success or error)
   const [sendStatus, setSendStatus] = useState(""); 
