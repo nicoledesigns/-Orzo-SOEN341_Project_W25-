@@ -5,11 +5,16 @@ import Messages from "../Messaging/Public_Chat";
 import UserList from "../DirectMessaging/UserList";
 import DirectMessaging from "../DirectMessaging/DirectMessaging";
 
-
 const UserDashboard = () => {
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const navigate = useNavigate();
+
+  const [showUserList, setShowUserList] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserName, setSelectedUserName] = useState("");
+
+  const [directMessageConversations, setDirectMessageConversations] = useState([]);
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
@@ -27,18 +32,40 @@ const UserDashboard = () => {
         if (data.channels) {
           setChannels(data.channels);
           if (data.channels.length > 0) {
-            setSelectedChannel(data.channels[0]); 
+            setSelectedChannel(data.channels[0]);
           }
         } else {
           console.error("Error fetching user channels:", data.error);
         }
       })
       .catch((err) => console.error("Error fetching user channels:", err));
+
+    fetchDirectMessageConversations(userId);
   }, [navigate]);
+
+  const fetchDirectMessageConversations = (userId) => {
+    fetch("http://localhost:8081/getUsers")
+      .then((response) => response.json())
+      .then((data) => {
+        const filteredUsers = data.users.filter(
+          (user) => user.id !== parseInt(userId, 10)
+        );
+        setDirectMessageConversations(filteredUsers);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  };
 
   const handleLogout = () => {
     sessionStorage.clear();
     navigate("/");
+  };
+
+  const handleUserSelect = (userId, userName) => {
+    setSelectedUserId(userId);
+    setSelectedUserName(userName);
+    setShowUserList(false);
   };
 
   const currentChannel =
@@ -61,6 +88,24 @@ const UserDashboard = () => {
           ))}
         </ul>
         {channels.length === 0 && <p>No channels available</p>}
+
+        <h3>Direct Messages</h3>
+        <ul>
+          {directMessageConversations.map((user) => (
+            <li
+              key={user.id}
+              className={selectedUserId === user.id ? "active" : ""}
+              onClick={() => handleUserSelect(user.id, user.name)}
+            >
+              {user.name} {user.role === "admin" ? "(Admin)" : ""}
+            </li>
+          ))}
+        </ul>
+
+        <button onClick={() => setShowUserList(!showUserList)}>
+          {showUserList ? "Hide User List" : "Start a Direct Message"}
+        </button>
+
         <button className="logout-button" onClick={handleLogout}>
           Logout
         </button>
@@ -68,9 +113,39 @@ const UserDashboard = () => {
 
       <div className="chat-section">
         {selectedChannel ? (
-          <Messages selectedChannel={selectedChannel} />
+          <div className="channel-chat-container">
+            <div className="channel-chat-header">
+              <h2>#{selectedChannel.name}</h2>
+              <button
+                className="close-button"
+                onClick={() => setSelectedChannel(null)}
+              >
+                X
+              </button>
+            </div>
+            <Messages selectedChannel={selectedChannel} />
+          </div>
         ) : (
           <p>Please select a channel to view messages.</p>
+        )}
+
+        {showUserList && (
+          <UserList
+            currentUserId={sessionStorage.getItem("userId")}
+            onUserSelect={handleUserSelect}
+          />
+        )}
+
+        {selectedUserId && (
+          <DirectMessaging
+            currentUserId={sessionStorage.getItem("userId")}
+            receiverId={selectedUserId}
+            receiverName={selectedUserName}
+            onClose={() => {
+              setSelectedUserId(null);
+              setSelectedUserName("");
+            }}
+          />
         )}
       </div>
 
@@ -79,8 +154,8 @@ const UserDashboard = () => {
           <>
             <h3>{currentChannel.name}</h3>
             <p>
-              Description: This is your space to collaborate and discuss all things{" "}
-              {currentChannel.name}-related.
+              Description: This is your space to collaborate and discuss all
+              things {currentChannel.name}-related.
             </p>
           </>
         ) : (
