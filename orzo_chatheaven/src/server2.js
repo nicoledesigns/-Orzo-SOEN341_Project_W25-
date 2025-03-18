@@ -368,7 +368,8 @@ app.post("/sendDirectMessage", (req, res) => {
   const sortedUsers = [senderId, receiverId].sort().join("--");
   const filePath = path.join(__dirname, 'db', `@${sortedUsers}.txt`);
 
-  const formattedDate = new Date().toISOString();
+  const date = new Date();
+  const formattedDate = formatDate(date);
   const formattedMessage = `\n${senderId};${message};${formattedDate}`;
 
   fs.appendFile(filePath, formattedMessage, (err) => {
@@ -459,6 +460,7 @@ app.post("/leaveChannel", (req, res) => {
   });
 });
 
+
 //requesting to join a channel
 app.post("/requestToJoinChannel", (req, res) => {
   const { userId, channelId } = req.body;
@@ -476,6 +478,7 @@ app.post("/requestToJoinChannel", (req, res) => {
     return res.status(200).json({ message: "Request sent successfully" });
   });
 });
+
 
 
 // Start the server
