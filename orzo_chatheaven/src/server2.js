@@ -459,6 +459,24 @@ app.post("/leaveChannel", (req, res) => {
   });
 });
 
+//requesting to join a channel
+app.post("/requestToJoinChannel", (req, res) => {
+  const { userId, channelId } = req.body;
+  if (!userId || !channelId) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+
+  const sql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
+  db.run(sql, [userId, channelId], function (err) {
+    if (err) {
+      console.error("Error requesting to join channel:", err);
+      return res.status(500).json({ error: "Failed to request to join channel" });
+    }
+    console.log("User requested to join channel:", userId, channelId);
+    return res.status(200).json({ message: "Request sent successfully" });
+  });
+});
+
 
 // Start the server
 app.listen(8081, () => {
