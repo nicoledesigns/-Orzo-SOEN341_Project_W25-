@@ -11,7 +11,22 @@
     background-color: white;
     padding: 20px;
     border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full height */
+    overflow-y: auto; /* Allows scrolling */
   }
+  .direct-messages-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 50vh; /* Adjust based on your UI */
+  }
+  .direct-messages-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
   
   .chathaven-title {
     text-align: center;
@@ -211,5 +226,38 @@
     font-size: 20px;
     cursor: pointer;
     color: #555;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+  }
+  
+  .user-name {
+    font-weight: bold;
+    color: black;
+  }
+  
+  .status-indicator {
+    font-size: 12px;
+    color: gray;
+  }
+  
+  .status-indicator.online {
+    color: green;
+  }
+  
+  .status-indicator.away {
+    color: orange;
+  }
+  
+  .status-indicator.offline {
+    color: gray;
+  }
+  
+  .last-seen {
+    font-size: 12px;
+    color: #777;
   }
   

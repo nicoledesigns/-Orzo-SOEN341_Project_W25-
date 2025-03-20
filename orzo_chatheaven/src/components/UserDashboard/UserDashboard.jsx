@@ -57,10 +57,30 @@ const UserDashboard = () => {
       });
   };
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    navigate("/");
+
+  const handleLogout = async () => {
+    const userId = sessionStorage.getItem("userId");
+  
+    if (!userId) {
+      sessionStorage.clear();
+      navigate("/");
+      return;
+    }
+  
+    try {
+      await fetch("http://localhost:8081/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+  
+      sessionStorage.clear();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
+  
 
   const handleUserSelect = (userId, userName) => {
     setSelectedUserId(userId);
@@ -91,16 +111,31 @@ const UserDashboard = () => {
 
         <h3>Direct Messages</h3>
         <ul>
-          {directMessageConversations.map((user) => (
-            <li
-              key={user.id}
-              className={selectedUserId === user.id ? "active" : ""}
-              onClick={() => handleUserSelect(user.id, user.name)}
-            >
-              {user.name} {user.role === "admin" ? "(Admin)" : ""}
-            </li>
-          ))}
-        </ul>
+  {directMessageConversations.map((user) => (
+    <li
+      key={user.id}
+      className={selectedUserId === user.id ? "active" : ""}
+      onClick={() => handleUserSelect(user.id, user.name)}
+    >
+      <div className="user-info">
+        <span className="user-name">{user.name}</span>
+        <span className={`status-indicator ${user.status}`}>
+          {user.status === "online" ? "🟢 Online" :
+          user.status === "away" ? "🟡 Away" :
+          "⚪ Offline"}
+        </span>
+        {user.status === "offline" && (
+          <span className="last-seen">
+          {user.status === "offline" && user.last_seen
+            ? `Last seen: ${new Date(user.last_seen).toLocaleString()}`
+            : "Last seen: Unknown"}
+        </span>
+        
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
 
         <button onClick={() => setShowUserList(!showUserList)}>
           {showUserList ? "Hide User List" : "Start a Direct Message"}
