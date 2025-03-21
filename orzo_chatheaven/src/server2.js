@@ -646,6 +646,32 @@ app.post("/createPrivateChannel", (req, res) => {
 });
 
 
+// Add users to a private channel
+app.post("/addUserToPrivateChannel", (req, res) => {
+  const { channelId, userIds } = req.body;
+
+  if (!channelId || !userIds || !Array.isArray(userIds)) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+
+  const sql = `
+    INSERT INTO channel_members (channel_id, user_id)
+    VALUES (?, ?)
+    ON CONFLICT(channel_id, user_id) DO NOTHING
+  `;
+  const dbTasks = userIds.map((userId) =>
+    new Promise((resolve, reject) => {
+      db.run(sql, [channelId, userId], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    })
+  );
+  Promise.all(dbTasks)
+    .then(() => res.status(200).json({ message: "Users added to channel successfully" }))
+    .catch((err) => res.status(500).json({ error: "Failed to add users", details: err }));
+});
+
 
 
   
