@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// List of emojis for the picker
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",       
   "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",       

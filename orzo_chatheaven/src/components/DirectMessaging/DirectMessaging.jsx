@@ -1,11 +1,30 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./DirectMessaging.css";
+const emojiList = [
+  "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",       
+  "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",       
+  "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩",      
+  "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",       
+  "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬",       
+  "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗",        
+  "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯",       
+  "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐",       
+  "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈",       
+  "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾",       
+  "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾" 
+];
 
 const DirectMessaging = ({ currentUserId, receiverId, receiverName, onClose }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [sendStatus, setSendStatus] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const addEmoji = (emoji) => {
+    setMessage((prevMessage) => prevMessage + emoji);
+    setShowEmojiPicker(false); // Optionally hide picker after selection
+  };
 
   // Load messages between the current user and the selected receiver
   const loadMessages = () => {
@@ -80,7 +99,10 @@ const DirectMessaging = ({ currentUserId, receiverId, receiverName, onClose }) =
         })}
       </div>
 
-      <div className="chat-input">
+      <div className="chat-input" style={{ position: "relative" }}>
+        <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ marginRight: "10px" }}>
+          😊
+        </button>
         <input
           type="text"
           placeholder="Type a message..."
@@ -88,6 +110,31 @@ const DirectMessaging = ({ currentUserId, receiverId, receiverName, onClose }) =
           onChange={(e) => setMessage(e.target.value)}
         />
         <button onClick={sendMessage}>Send</button>
+
+        {showEmojiPicker && (
+          <div
+            className="emoji-picker"
+            style={{
+              padding: "10px",
+              border: "1px solid #ddd",
+              borderRadius: "5px",
+              background: "#fff",
+              position: "absolute",
+              bottom: "60px",
+              zIndex: 10
+            }}
+          >
+            {emojiList.map((emoji, index) => (
+              <span
+                key={index}
+                onClick={() => addEmoji(emoji)}
+                style={{ cursor: "pointer", padding: "5px", fontSize: "1.5em" }}
+              >
+                {emoji}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {sendStatus && <div className="send-feedback">{sendStatus}</div>}
