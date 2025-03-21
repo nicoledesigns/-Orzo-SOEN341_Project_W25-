@@ -1,4 +1,19 @@
 import React, { useState, useEffect } from "react";
+// List of emojis for the picker
+const emojiList = [
+  "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",       
+  "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",       
+  "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩",      
+  "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",       
+  "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬",       
+  "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗",        
+  "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯",       
+  "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐",       
+  "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈",       
+  "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾",       
+  "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾" 
+];
+
 
 const allowedColors = [
   "#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231",
@@ -13,6 +28,12 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userColors, setUserColors] = useState({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const addEmoji = (emoji) => {
+    setMessage((prevMessage) => prevMessage + emoji);
+    setShowEmojiPicker(false); // Optionally hide picker after selection
+  };
 
   // Assume that userId and userName are stored in sessionStorage after login.
   const userId = sessionStorage.getItem("userId");
@@ -213,7 +234,10 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
           );
         })}
       </div>
-        <div className="chat-input">
+        <div className="chat-input" style={{ position: "relative" }}>
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ marginRight: "10px" }}>
+          😊
+          </button>
           <input
             type="text"
             placeholder="Type a message..."
@@ -221,6 +245,31 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
             onChange={(e) => setMessage(e.target.value)}
           />
           <button onClick={handleMessageSend}>Send</button>
+          {showEmojiPicker && (
+            <div
+              className="emoji-picker"
+              style={{
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                background: "#fff",
+                position: "absolute",
+                bottom: "60px",
+                zIndex: 10
+              }}
+            >
+              {emojiList.map((emoji, index) => (
+                <span
+                  key={index}
+                  onClick={() => addEmoji(emoji)}
+                  style={{ cursor: "pointer", padding: "5px", fontSize: "1.5em" }}
+                >
+                  {emoji}
+                </span>
+              ))}
+            </div>
+          )}
+          
         </div>
                 {/* Nicole: Display send status (success or error) */}
                 {sendStatus && <div className="send-feedback">{sendStatus}</div>}
