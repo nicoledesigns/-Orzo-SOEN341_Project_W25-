@@ -546,6 +546,32 @@ app.post("/logout", (req, res) => {
     });
 });
 
+// creating default channels
+app.post("/createDefaultChannels", (req, res) => { // Define a POST route for creating default channels
+  const defaultChannels = ["General", "Kitten Room", "Gaming Room"]; // List of default channels
+
+  const checkSql = "SELECT COUNT(*) AS count FROM channels WHERE name = ?"; // SQL query to check if a channel already exists
+  const insertSql = "INSERT INTO channels (name) VALUES (?)"; // SQL query to insert a new channel
+
+  const dbTasks = defaultChannels.map((name) => 
+    new Promise((resolve, reject) => { // Create a new Promise for each channel
+      db.get(checkSql, [name], (err, row) => { // Execute the check query
+        if (err) return reject(err); 
+        if (row.count > 0) return resolve(); 
+
+        db.run(insertSql, [name], function (err) { // Execute the insert query
+          if (err) reject(err); 
+          else resolve(); 
+        });
+      });
+    })
+  );
+
+  Promise.all(dbTasks) // Wait for all database tasks to complete
+    .then(() => res.status(200).json({ message: "Default channels initialized successfully" })) 
+    .catch((err) => res.status(500).json({ error: "Failed to create default channels", details: err }));
+});
+
 
 
 
