@@ -55,46 +55,65 @@ app.post("/signup", (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required!" });
-  }
-
-  const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)";
-  db.get(sql, [email], (err, row) => {
-    if (err) {
-      console.error("Login error:", err);
-      return res.status(500).json({ error: "Login failed" });
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required!" });
     }
 
-    if (!row) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+    const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)";
 
-    bcrypt.compare(password, row.password, (err, result) => {
-      if (err) {
-        console.error("Password comparison error:", err);
-        return res.status(500).json({ error: "Login failed" });
-      }
+    db.get(sql, [email], (err, row) => {
+        if (err) {
+            console.error("Login error:", err);
+            return res.status(500).json({ error: "Login failed" });
+        }
 
-      if (result) {
-        console.log("Login successful:", row);
-        return res.json({
-          message: "Login successful",
-          user: {
-            id: row.id,
-            name: row.name,
-            email: row.email,
-            role: row.role
-          }
+        if (!row) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        bcrypt.compare(password, row.password, (err, result) => {
+            if (err) {
+                console.error("Password comparison error:", err);
+                return res.status(500).json({ error: "Login failed" });
+            }
+
+            if (result) {
+                // Update user status to online
+                const updateStatusSQL = "UPDATE users SET status = 'online', last_seen = datetime('now') WHERE id = ?";
+                db.run(updateStatusSQL, [row.id], (updateErr) => {
+                    if (updateErr) {
+                        console.error("Error updating user status:", updateErr);
+                    }
+                });
+
+                // Fetch the updated user list to send to the frontend
+                const getUsersSQL = "SELECT id, name, status, last_seen FROM users";
+                db.all(getUsersSQL, [], (usersErr, users) => {
+                    if (usersErr) {
+                        console.error("Error fetching users:", usersErr);
+                        return res.status(500).json({ error: "Failed to fetch updated users" });
+                    }
+
+                    return res.json({
+                        message: "Login successful",
+                        user: {
+                            id: row.id,
+                            name: row.name,
+                            email: row.email,
+                            role: row.role,
+                            status: "online",
+                            last_seen: new Date().toISOString(),
+                        },
+                        users: users // Send updated user list to frontend
+                    });
+                });
+            } else {
+                return res.status(401).json({ error: "Invalid credentials" });
+            }
         });
-      } else {
-        console.log("Wrong password");
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
     });
-  });
 });
 
 // Add a new channel
@@ -179,19 +198,26 @@ app.post("/addUserToChannel", (req, res) => {
 
 // Get all users
 app.get("/getUsers", (req, res) => {
-  const sql = "SELECT id, name FROM users";
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error("Error fetching users:", err);
-      return res.status(500).json({ error: "Failed to fetch users" });
-    }
-    const users = rows.map(row => ({
-      id: row.id,
-      name: row.name,
-    }));
-    res.status(200).json({ users });
-  });
+    const sql = "SELECT id, name, status, last_seen FROM users";
+
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("Error fetching users:", err);
+            return res.status(500).json({ error: "Failed to fetch users" });
+        }
+
+        const users = rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            status: row.status,
+            last_seen: row.last_seen || null // Ensure null instead of undefined
+        }));
+
+        res.status(200).json({ users });
+    });
 });
+
+
 
 // Get all channels
 app.get("/getChannels", (req, res) => {
@@ -494,34 +520,39 @@ app.post("/requestToJoinChannel", (req, res) => {
   });
 });
 
-// creating default channels
-app.post("/createDefaultChannels", (req, res) => { // Define a POST route for creating default channels
-  const defaultChannels = ["General", "Kitten Room", "Gaming Room"]; // List of default channels
+app.post("/logout", (req, res) => {
+    const { userId } = req.body;
 
-  const checkSql = "SELECT COUNT(*) AS count FROM channels WHERE name = ?"; // SQL query to check if a channel already exists
-  const insertSql = "INSERT INTO channels (name) VALUES (?)"; // SQL query to insert a new channel
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required!" });
+    }
+  
+    const timestamp = new Date().toISOString(); // Store UTC timestamp
+    const sql = "UPDATE users SET status = 'offline', last_seen = ? WHERE id = ?";
+    
+    db.run(sql, [timestamp, userId], function (err) {
+      if (err) {
+        console.error("Error updating last_seen:", err);
+        return res.status(500).json({ error: "Failed to update last_seen" });
+      }
 
-  const dbTasks = defaultChannels.map((name) => 
-    new Promise((resolve, reject) => { // Create a new Promise for each channel
-      db.get(checkSql, [name], (err, row) => { // Execute the check query
-        if (err) return reject(err); 
-        if (row.count > 0) return resolve(); 
-
-        db.run(insertSql, [name], function (err) { // Execute the insert query
-          if (err) reject(err); 
-          else resolve(); 
-        });
+      console.log(`User ${userId} logged out at ${timestamp}`);
+      
+      // Return success response
+      res.status(200).json({ 
+        message: "Logout successful", 
+        userId: userId 
       });
-    })
-  );
-
-  Promise.all(dbTasks) // Wait for all database tasks to complete
-    .then(() => res.status(200).json({ message: "Default channels initialized successfully" })) 
-    .catch((err) => res.status(500).json({ error: "Failed to create default channels", details: err }));
+    });
 });
 
 
 
+
+
+
+
+  
 // Start the server
 app.listen(8081, () => {
   console.log("Server is listening on http://localhost:8081");

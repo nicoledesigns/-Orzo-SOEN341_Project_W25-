@@ -141,10 +141,29 @@ const AdminDashboard = () => {
       });
   };
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    navigate("/");
+  const handleLogout = async () => {
+    const userId = sessionStorage.getItem("userId");
+  
+    if (!userId) {
+      sessionStorage.clear();
+      navigate("/");
+      return;
+    }
+  
+    try {
+      await fetch("http://localhost:8081/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+  
+      sessionStorage.clear();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
+  
 
   // Called when a user is selected from the DM user list
   const handleUserSelect = (userId, userName) => {
@@ -249,6 +268,37 @@ const AdminDashboard = () => {
             </li>
           ))}
         </ul>
+
+        <h4>All Users</h4>
+        <ul className="user-list">
+  {users.length > 0 ? (
+    users.map((user) => (
+      <li key={user.id} className="user-item">
+        <div className="user-info">
+          <span className="user-name">{user.name}</span>
+          <span className={`status-indicator ${user.status}`}>
+            {user.status === "online" && "🟢 Online"}
+            {user.status === "away" && "🟡 Away (Inactive)"}
+            {user.status === "offline" && "⚪ Offline"}
+          </span>
+          {user.status === "offline" && (
+            <span className="last-seen">
+            {user.status === "offline" && user.last_seen
+              ? `Last seen: ${new Date(user.last_seen).toLocaleString()}`
+              : "Last seen: Unknown"}
+          </span>
+          
+          
+          )}
+        </div>
+      </li>
+    ))
+  ) : (
+    <p>No users found</p>
+  )}
+</ul>
+
+
         <h4>Add Users to Channel</h4>
 
         <div className="user-selection" style={{ maxHeight: "200px", overflowY: "auto" }}>
