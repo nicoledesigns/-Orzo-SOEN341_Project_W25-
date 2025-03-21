@@ -615,6 +615,35 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
   });
 });
 
+// Private channels where a user can create a channel and invite other users to join, kick users, and see the list of usrers in the channel
+// Create a private channel
+app.post("/createPrivateChannel", (req, res) => {
+  const { name, creatorId } = req.body;
+  if (!name || !creatorId) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+
+  const insertChannelSql = "INSERT INTO channels (name) VALUES (?)";
+  const insertMemberSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
+
+  db.run(insertChannelSql, [name], function (err) {
+    if (err) {
+      console.error("Error creating private channel:", err);
+      return res.status(500).json({ error: "Failed to create private channel" });
+    }
+
+    const channelId = this.lastID;
+
+    db.run(insertMemberSql, [channelId, creatorId], function (err) {
+      if (err) {
+        console.error("Error adding creator to private channel:", err);
+        return res.status(500).json({ error: "Failed to add creator to private channel" });
+      }
+
+      return res.status(200).json({ message: "Private channel created successfully", channelId });
+    });
+  });
+});
 
 
 
