@@ -519,32 +519,34 @@ app.post("/requestToJoinChannel", (req, res) => {
     });
   });
 });
-
-app.post("/logout", (req, res) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required!" });
-    }
   
-    const timestamp = new Date().toISOString(); // Store UTC timestamp
-    const sql = "UPDATE users SET status = 'offline', last_seen = ? WHERE id = ?";
-    
-    db.run(sql, [timestamp, userId], function (err) {
-      if (err) {
-        console.error("Error updating last_seen:", err);
-        return res.status(500).json({ error: "Failed to update last_seen" });
-      }
+//create away function Nicole
+app.post("/set-away", (req, res) => {
+  const { userId } = req.body;
 
-      console.log(`User ${userId} logged out at ${timestamp}`);
-      
-      // Return success response
-      res.status(200).json({ 
-        message: "Logout successful", 
-        userId: userId 
-      });
-    });
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required!" });
+  }
+
+  const timestamp = new Date().toISOString();
+  const sql = "UPDATE users SET status = 'away', last_seen = ? WHERE id = ?";
+
+  db.run(sql, [timestamp, userId], function (err) {
+    if (err) {
+      console.error("Error updating status to away:", err);
+      return res.status(500).json({ error: "Failed to update status" });
+    }
+
+    if (this.changes === 0) {
+      // No rows were updated (user not found)
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log(`User ${userId} is now away at ${timestamp}`);
+    res.status(200).json({ message: "User set to away", userId: userId });
+  });
 });
+
 
 // creating default channels
 app.post("/createDefaultChannels", (req, res) => { // Define a POST route for creating default channels

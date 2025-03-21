@@ -363,3 +363,8 @@
   color: #777;
 }
 
+.away-btn {
+  position: relative; /* Ensure it's on top */
+  z-index: 100; /* Higher than overlapping elements */
+  cursor: pointer; /* Ensure it's clickable */
+}

@@ -163,6 +163,33 @@ const AdminDashboard = () => {
       console.error("Logout failed:", error);
     }
   };
+    
+  //away button
+  const setAwayStatus = (userId) => {
+    // Optimistically update the frontend first (set the user's status to away)
+    const updatedUsers = users.map((user) =>
+      user.id === userId ? { ...user, status: "away" } : user
+    );
+    setUsers(updatedUsers); // Assuming you have a state for `users` in your component
+  
+    // Now update the status in the backend
+    fetch('/set-away', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message); // This will log: "User set to away"
+      // You can also update any other state or UI elements here if needed
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  };
+  
   
 
   // Called when a user is selected from the DM user list
@@ -280,6 +307,13 @@ const AdminDashboard = () => {
             {user.status === "online" && "🟢 Online"}
             {user.status === "away" && "🟡 Away (Inactive)"}
             {user.status === "offline" && "⚪ Offline"}
+            
+              {user.id.toString() === sessionStorage.getItem("userId") && (
+             <button className="away-btn" onClick={() => setAwayStatus(user.id)}>
+            Set Away
+            </button>
+            )}
+           
           </span>
           {user.status === "offline" && (
             <span className="last-seen">
@@ -287,8 +321,6 @@ const AdminDashboard = () => {
               ? `Last seen: ${new Date(user.last_seen).toLocaleString()}`
               : "Last seen: Unknown"}
           </span>
-          
-          
           )}
         </div>
       </li>
