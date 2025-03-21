@@ -691,8 +691,63 @@ app.post("/addUserToPrivateChannel", (req, res) => {
 });
 
 
+//seeing which private channels the user is part of
+app.get("/userChannels/:userId", (req, res) => {
+  const userId = req.params.userId;
 
-  
+  const sql = `
+    SELECT c.id, c.name, c.private 
+    FROM channels c
+    JOIN channel_members cm ON c.id = cm.channel_id
+    WHERE cm.user_id = ?;
+  `;
+
+  db.all(sql, [userId], (err, channels) => {
+    if (err) return res.status(500).json({ error: "Database error", details: err });
+    res.status(200).json({ channels });
+  });
+});
+
+
+// Kick users from a private channel (Only Creator or Admins can kick)
+app.post("/kickUserFromPrivateChannel", (req, res) => {
+  const { channelId, userId, requestedID } = req.body;
+
+  if (!channelId || !userId || !requestedID) {
+    return res.status(400).json({ error: "Invalid input!" });
+  }
+  const permissionSql = `
+    SELECT c.private, c.creator_id, cm.user_id AS isMember
+    FROM channels c
+    LEFT JOIN channel_members cm ON c.id = cm.channel_id AND cm.user_id = ?
+    WHERE c.id = ?
+  `;
+
+  db.get(permissionSql, [requestedID, channelId], (err, row) => {
+    if (err) {
+      console.error("Error checking channel membership:", err);
+      return res.status(500).json({ error: "Failed to check channel membership" });
+    }
+
+    if (!row || row.private !== 1 || !row.isMember) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    if (row.creator_id === userId) {
+      return res.status(403).json({ error: "Cannot remove the channel creator" });
+    }
+
+    const sql = "DELETE FROM channel_members WHERE channel_id = ? AND user_id = ?";
+    db.run(sql, [channelId, userId], function (err) {
+      if (err) {
+        console.error("Error kicking user from private channel:", err);
+        return res.status(500).json({ error: "Failed to kick user from private channel" });
+      }
+      res.status(200).json({ message: "User kicked from private channel successfully" });
+    });
+  });
+});
+
 // Start the server
 app.listen(8081, () => {
   console.log("Server is listening on http://localhost:8081");
