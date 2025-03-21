@@ -572,7 +572,48 @@ app.post("/createDefaultChannels", (req, res) => { // Define a POST route for cr
     .catch((err) => res.status(500).json({ error: "Failed to create default channels", details: err }));
 });
 
+//auto-join users to default channels
+app.post("/autoJoinDefaultChannels", (req, res) => {
+  const defaultChannels = ["General", "Kitten Room", "Gaming Room"];
 
+  const getAllUsersSql = "SELECT id FROM users"; 
+  const getChannelIdSql = "SELECT id FROM channels WHERE name = ?";
+  const checkMembershipSql = "SELECT COUNT(*) AS count FROM channel_members WHERE channel_id = ? AND user_id = ?";
+  const insertSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
+
+  db.all(getAllUsersSql, (err, users) => {
+    if (err) return res.status(500).json({ error: "Failed to get users", details: err });
+
+    if (users.length === 0) return res.status(404).json({ error: "No users found" });
+
+    const dbTasks = users.flatMap(({ id: userId }) =>
+      defaultChannels.map((name) =>
+        new Promise((resolve, reject) => {
+          db.get(getChannelIdSql, [name], (err, row) => {
+            if (err) return reject(err);
+            if (!row) return resolve(); 
+
+            const channelId = row.id;
+
+            db.get(checkMembershipSql, [channelId, userId], (err, membershipRow) => {
+              if (err) return reject(err);
+              if (membershipRow.count > 0) return resolve(); 
+
+              db.run(insertSql, [channelId, userId], function (err) {
+                if (err) reject(err);
+                else resolve();
+              });
+            });
+          });
+        })
+      )
+    );
+
+    Promise.all(dbTasks)
+      .then(() => res.status(200).json({ message: "All users auto-joined to default channels successfully." }))
+      .catch((err) => res.status(500).json({ error: "Failed to auto-join users to default channels", details: err }));
+  });
+});
 
 
 
