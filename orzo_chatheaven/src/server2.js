@@ -626,7 +626,7 @@ app.post("/createPrivateChannel", (req, res) => {
   const insertChannelSql = "INSERT INTO channels (name) VALUES (?)";
   const insertMemberSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
 
-  db.run(insertChannelSql, [name], function (err) {
+  db.run(insertChannelSql, [name, 1], function (err) {
     if (err) {
       console.error("Error creating private channel:", err);
       return res.status(500).json({ error: "Failed to create private channel" });
