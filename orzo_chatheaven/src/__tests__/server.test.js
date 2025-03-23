@@ -72,6 +72,24 @@ describe(" ChatHaven API Tests", () => {
         expect(res.body.message).toBe("Channel added successfully");
         expect(res.body.channelId).toBeDefined(); 
     });
+
+    test("POST /addUserToChannel → should add a user to a channel", async () => {
+        const res = await request(server).post("/addUserToChannel").send({
+            channelId: testChannelId,
+            userIds: [testUserId]
+        });
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe("Users added to channel successfully");
+    });
+
+    test("GET /getUserChannels/:userId → should return the channels a user is in", async () => {
+        const res = await request(server).get(`/getUserChannels/${testUserId}`);
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body.channels)).toBe(true);
+        expect(res.body.channels.length).toBeGreaterThan(0);
+        expect(res.body.channels[0]).toHaveProperty("id");
+        expect(res.body.channels[0]).toHaveProperty("name");
+    });
     
 });
 
