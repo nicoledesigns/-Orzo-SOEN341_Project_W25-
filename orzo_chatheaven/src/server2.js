@@ -550,6 +550,7 @@ app.post("/set-away", (req, res) => {
 
 // creating default channels
 app.post("/createDefaultChannels", (req, res) => { // Define a POST route for creating default channels
+  console.log("Creating default channels..."); // Add a log for testing
   const defaultChannels = ["General", "Kitten Room", "Gaming Room"]; // List of default channels
 
   const checkSql = "SELECT COUNT(*) AS count FROM channels WHERE name = ?"; // SQL query to check if a channel already exists
@@ -576,6 +577,7 @@ app.post("/createDefaultChannels", (req, res) => { // Define a POST route for cr
 
 //auto-join users to default channels
 app.post("/autoJoinDefaultChannels", (req, res) => {
+  console.log("Auto-joining users to default channels..."); // Add a log for testing
   const defaultChannels = ["General", "Kitten Room", "Gaming Room"];
 
   const getAllUsersSql = "SELECT id FROM users"; 
@@ -616,6 +618,23 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
       .catch((err) => res.status(500).json({ error: "Failed to auto-join users to default channels", details: err }));
   });
 });
+
+/**  
+// Get default channels
+app.get("/getDefaultChannels", (req, res) => {
+  const getDefaultChannelsSql = "SELECT * FROM channels WHERE name IN ('General', 'Kitten Room', 'Gaming Room')";
+
+  db.all(getDefaultChannelsSql, (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to fetch default channels", details: err });
+    }
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "No default channels found" });
+    }
+    res.status(200).json({ channels: rows });
+  });
+});
+*/ 
 
 // Private channels where a user can create a channel and invite other users to join, kick users, and see the list of usrers in the channel
 // Create a private channel

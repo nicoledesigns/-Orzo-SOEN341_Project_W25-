@@ -9,12 +9,14 @@ const UserDashboard = () => {
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const navigate = useNavigate();
-
   const [showUserList, setShowUserList] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
-
   const [directMessageConversations, setDirectMessageConversations] = useState([]);
+  const [defaultChannels, setDefaultChannels] = useState([]);
+  const [privateChannels, setPrivateChannels] = useState([]); // Add state for private channels
+  const [newPrivateChannel, setNewPrivateChannel] = useState(""); // Add state for new private channel
+  const [selectedPrivateChannel, setSelectedPrivateChannel] = useState(null); // Add state for selected private channel
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
@@ -39,6 +41,17 @@ const UserDashboard = () => {
         }
       })
       .catch((err) => console.error("Error fetching user channels:", err));
+  // Fetch default channels
+  fetch("http://localhost:8081/getDefaultChannels") // You need a route like this for default channels
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.channels) {
+        setDefaultChannels(data.channels);
+      } else {
+        console.error("Error fetching default channels:", data.error);
+      }
+    })
+    .catch((err) => console.error("Error fetching default channels:", err));
 
     fetchDirectMessageConversations(userId);
   }, [navigate]);
@@ -108,7 +121,20 @@ const UserDashboard = () => {
           ))}
         </ul>
         {channels.length === 0 && <p>No channels available</p>}
-
+        // Add the Default Channels to the sidebar
+<h3>Default Channels</h3>
+<ul>
+  {defaultChannels.map((channel) => (
+    <li
+      key={channel.id}
+      className={selectedChannel?.id === channel.id ? "active" : ""}
+      onClick={() => setSelectedChannel(channel)}
+    >
+      #{channel.name}
+    </li>
+  ))}
+</ul>
+{defaultChannels.length === 0 && <p>No default channels available</p>}
         <h3>Direct Messages</h3>
         <ul>
   {directMessageConversations.map((user) => (
