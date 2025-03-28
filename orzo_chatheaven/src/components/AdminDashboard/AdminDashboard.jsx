@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const [selectedUserName, setSelectedUserName] = useState("");
 
   const navigate = useNavigate();
-   
+  
   useEffect(() => {
     fetch("http://localhost:8081/getChannels")
       .then((response) => response.json())
@@ -38,6 +38,16 @@ const AdminDashboard = () => {
         setUsers(Array.isArray(data.users) ? data.users : []);
       })
       .catch((err) => console.error("Error fetching users:", err));
+      // Fetch private channels when the component is loaded or user logs in
+    const loggedInUserId = sessionStorage.getItem("userId");
+    if (loggedInUserId) {
+      fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setPrivateChannels(Array.isArray(data.channels) ? data.channels : []);
+        })
+        .catch((err) => console.error("Error fetching private channels:", err));
+    }
 }, []); 
 
   const handleUserSelection = (userId) => {
@@ -198,10 +208,7 @@ const handleCreatePrivateChannel = () => {
     return;
   }
 
-  // if (!selectedUserId) {
-  //   alert("Please select a user first!");
-  //   return;
-  // }
+
   const loggedInUserId = sessionStorage.getItem("userId");
 
   if (!loggedInUserId) {
@@ -227,8 +234,8 @@ const handleCreatePrivateChannel = () => {
       console.log("Private channel response:", data);
       if (data.message) {
         alert("Private Channel added successfully!");
-        setChannels([
-          ...channels,
+        setPrivateChannels([
+          ...privateChannels,
           { id: data.channelId, name: newPrivateChannel, members: [] },
         ]);
         setNewPrivateChannel("");
@@ -380,15 +387,16 @@ const handleCreatePrivateChannel = () => {
           />
           <button onClick={handleAddChannel}>Add</button>
         </div>
-        <div className="add-private-channel">
-          <input
-            type="text"
-            placeholder="Add new private channel"
-            value={newPrivateChannel}
-            onChange={(e) => setNewPrivateChannel(e.target.value)}
-          />
-          <button onClick={handleCreatePrivateChannel}>Add Private</button>
-        </div>
+        {/* Add New Private Channel */}
+  <div className="add-private-channel">
+    <input
+      type="text"
+      placeholder="Add new private channel"
+      value={newPrivateChannel}
+      onChange={(e) => setNewPrivateChannel(e.target.value)}
+    />
+    <button onClick={handleCreatePrivateChannel}>Add Private</button>
+  </div>
         <button onClick={() => setShowUserList(!showUserList)}>
           {showUserList ? "Hide User List" : "Start a Direct Message"}
         </button>
