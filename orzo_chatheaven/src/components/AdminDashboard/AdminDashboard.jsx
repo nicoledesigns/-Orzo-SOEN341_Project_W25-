@@ -11,8 +11,14 @@ const AdminDashboard = () => {
   const [newChannel, setNewChannel] = useState("");
   const [defaultChannels, setDefaultChannels] = useState([]);
   const [privateChannels, setPrivateChannels] = useState([]); // Add state for private channels
+
   const [newPrivateChannel, setNewPrivateChannel] = useState(""); // Add state for new private channel
+
+
   const [selectedPrivateChannel, setSelectedPrivateChannel] = useState(null); // Add state for selected private channel
+
+
+
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -27,8 +33,16 @@ const AdminDashboard = () => {
     fetch("http://localhost:8081/getChannels")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched channels:", data);
-        setChannels(Array.isArray(data.channels) ? data.channels : []);
+        const allChannels = Array.isArray(data.channels) ? data.channels : []
+        
+        const nonPirvate = allChannels.filter((channel) => channel.is_private === 0)
+        setChannels(nonPirvate);
+
+        const filteredPrivateChannels = allChannels.filter(
+        (channel) => channel.is_private === 1
+      );
+      setPrivateChannels(filteredPrivateChannels);
+
       })
       .catch((err) => console.error("Error fetching channels:", err));
   
@@ -40,7 +54,7 @@ const AdminDashboard = () => {
         setDefaultChannels(Array.isArray(data.channels) ? data.channels : []);
       })
       .catch((err) => console.error("Error fetching default channels:", err));
-  
+      
     // Fetch users
     fetch("http://localhost:8081/getUsers")
       .then((response) => response.json())
