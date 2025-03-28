@@ -45,24 +45,31 @@ const UserDashboard = () => {
   }, [navigate]);
    */
 
-    // Fetch channels for the logged-in user
-    fetch(`http://localhost:8081/getUserChannels/${userId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.channels) {
-         // setChannels(data.channels);
-         setChannels(data.channels.filter((channel) => channel.type === "public"));
-         setPrivateChannels(data.channels.filter((channel) => channel.type === "private"));
-          if (data.channels.length > 0) {
-            setSelectedChannel(data.channels[0]);
-          }
-        } else {
-          console.error("Error fetching user channels:", data.error);
-        }
-      })
-      .catch((err) => console.error("Error fetching user channels:", err));
+  /** Fetch user channels, including private ones */
+fetch(`http://localhost:8081/getUserChannels/${userId}`)
+.then((response) => response.json())
+.then((data) => {
+  if (data.channels) {
+    console.log("Fetched user channels:", data.channels);
+    
+    // Store all channels
+    setChannels(data.channels);
 
-    fetchDirectMessageConversations(userId);
+    // Separate public and private channels
+    setPrivateChannels(data.channels.filter((channel) => channel.type === "private"));
+
+    // Select the first available channel by default
+    if (data.channels.length > 0) {
+      setSelectedChannel(data.channels[0]);
+    }
+  } else {
+    console.error("Error fetching user channels:", data.error);
+  }
+})
+.catch((err) => console.error("Error fetching user channels:", err));
+
+// Fetch direct messages separately
+fetchDirectMessageConversations(userId);
   }, [navigate]);
 
   const fetchDirectMessageConversations = (userId) => {
@@ -130,7 +137,7 @@ const UserDashboard = () => {
     setSelectedUserId(userId);
     setSelectedUserName(userName);
     setShowUserList(false);
-  };
+  }; 
 
   const currentChannel =
     selectedChannel || { name: "No channels available", members: [] };
