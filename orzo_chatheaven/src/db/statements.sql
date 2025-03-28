@@ -18,3 +18,6 @@ CREATE TABLE channel_members (
     FOREIGN KEY (channel_id) REFERENCES channels(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+
+ALTER TABLE channels ADD COLUMN is_private INTEGER DEFAULT 0;

@@ -198,17 +198,22 @@ const handleCreatePrivateChannel = () => {
     return;
   }
 
-  if (!selectedUserId) {
-    alert("Please select a user first!");
+  // if (!selectedUserId) {
+  //   alert("Please select a user first!");
+  //   return;
+  // }
+  const loggedInUserId = sessionStorage.getItem("userId");
+
+  if (!loggedInUserId) {
+    alert("You must be logged in to create a channel!");
     return;
   }
-
-  console.log("Creating private channel with creatorId:", selectedUserId);
+  console.log("Creating private channel with creatorId:", loggedInUserId);
 
   fetch("http://localhost:8081/createPrivateChannel", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: newPrivateChannel, creatorId: selectedUserId }),
+    body: JSON.stringify({ name: newPrivateChannel, creatorId: loggedInUserId }),
   })
     .then((response) => {
       if (!response.ok) {
