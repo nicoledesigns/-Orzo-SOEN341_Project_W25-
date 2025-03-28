@@ -152,11 +152,16 @@ const AdminDashboard = () => {
       console.error("Error fetching default channels:", err);
     }
   };
-  
-
   const handleAddUsersToPrivateChannel = () => {
     if (!selectedPrivateChannel) {
       alert("Please select a private channel first!");
+      return;
+    }
+
+    const UserId = localStorage.getItem("userId"); // Get logged-in user ID
+
+    if (!UserId) {
+      alert("User not identified. Please log in again.");
       return;
     }
 
@@ -166,15 +171,16 @@ const AdminDashboard = () => {
       body: JSON.stringify({
         channelId: selectedPrivateChannel.id,
         userIds: selectedUsers,
+        requestedID: UserId,  // ✅ Now sending requestedID
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
           alert("Users added to private channel successfully!");
-          fetch("http://localhost:8081/getPrivateChannels")
+          fetch(`http://localhost:8081/userChannels/${UserId}`)
             .then((response) => response.json())
-            .then((data) =>
+            .then((data) => 
               setPrivateChannels(Array.isArray(data.channels) ? data.channels : [])
             );
         } else {
@@ -184,37 +190,51 @@ const AdminDashboard = () => {
       .catch((err) => console.error("Error adding users to private channel:", err));
 
     setSelectedUsers([]);
-  };
+};
 
+const handleCreatePrivateChannel = () => {
+  if (!newPrivateChannel.trim()) {
+    alert("Channel name cannot be empty!");
+    return;
+  }
 
-  const handleAddPrivateChannel = () => {
-    if (newPrivateChannel.trim() === "") {
-      alert("Private channel name cannot be empty!");
-      return;
-    }
+  if (!selectedUserId) {
+    alert("Please select a user first!");
+    return;
+  }
 
-    fetch("http://localhost:8081/addPrivateChannel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newPrivateChannel }),
+  console.log("Creating private channel with creatorId:", selectedUserId);
+
+  fetch("http://localhost:8081/createPrivateChannel", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: newPrivateChannel, creatorId: selectedUserId }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then((data) => {
+          throw new Error(data.error || "Failed to add channel");
+        });
+      }
+      return response.json();
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Private channel response:", data);
-        if (data.message) {
-          alert("Private channel added successfully!");
-          setPrivateChannels([
-            ...privateChannels,
-            { id: data.channelId, name: newPrivateChannel, members: [] },
-          ]);
-          setNewPrivateChannel("");
-        }
-      })
-      .catch((err) => {
-        console.error("Error adding private channel:", err);
-        alert(err.message || "Something went wrong.");
-      });
-  };
+    .then((data) => {
+      console.log("Private channel response:", data);
+      if (data.message) {
+        alert("Private Channel added successfully!");
+        setChannels([
+          ...channels,
+          { id: data.channelId, name: newPrivateChannel, members: [] },
+        ]);
+        setNewPrivateChannel("");
+      }
+    })
+    .catch((err) => {
+      console.error("Error adding channel:", err);
+      alert(err.message || "Something went wrong.");
+    });
+};
+
   const handleDeleteMessage = (channelId, userId, message, time) => {
     const requestBody = {
       userId,
@@ -328,7 +348,7 @@ const AdminDashboard = () => {
       <li
         key={channel.id}
         className={selectedChannel?.id === channel.id ? "active" : ""}
-        onClick={() => setDefaultChannels(channel)}
+        onClick={() => setSelectedChannel(channel)}
       >
         #{channel.name}
       </li>
@@ -362,7 +382,7 @@ const AdminDashboard = () => {
             value={newPrivateChannel}
             onChange={(e) => setNewPrivateChannel(e.target.value)}
           />
-          <button onClick={handleAddPrivateChannel}>Add Private</button>
+          <button onClick={handleCreatePrivateChannel}>Add Private</button>
         </div>
         <button onClick={() => setShowUserList(!showUserList)}>
           {showUserList ? "Hide User List" : "Start a Direct Message"}

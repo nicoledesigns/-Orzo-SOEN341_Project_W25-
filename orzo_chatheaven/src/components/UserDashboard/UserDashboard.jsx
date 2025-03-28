@@ -41,17 +41,6 @@ const UserDashboard = () => {
         }
       })
       .catch((err) => console.error("Error fetching user channels:", err));
-  // Fetch default channels
-  fetch("http://localhost:8081/getDefaultChannels") // You need a route like this for default channels
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.channels) {
-        setDefaultChannels(data.channels);
-      } else {
-        console.error("Error fetching default channels:", data.error);
-      }
-    })
-    .catch((err) => console.error("Error fetching default channels:", err));
 
     fetchDirectMessageConversations(userId);
   }, [navigate]);
@@ -69,7 +58,6 @@ const UserDashboard = () => {
         console.error("Error fetching users:", error);
       });
   };
-
 
   const handleLogout = async () => {
     const userId = sessionStorage.getItem("userId");
@@ -121,7 +109,6 @@ const UserDashboard = () => {
           ))}
         </ul>
         {channels.length === 0 && <p>No channels available</p>}
-        // Add the Default Channels to the sidebar
 <h3>Default Channels</h3>
 <ul>
   {defaultChannels.map((channel) => (
@@ -134,7 +121,6 @@ const UserDashboard = () => {
     </li>
   ))}
 </ul>
-{defaultChannels.length === 0 && <p>No default channels available</p>}
         <h3>Direct Messages</h3>
         <ul>
   {directMessageConversations.map((user) => (

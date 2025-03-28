@@ -619,23 +619,6 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
   });
 });
 
-/**  
-// Get default channels
-app.get("/getDefaultChannels", (req, res) => {
-  const getDefaultChannelsSql = "SELECT * FROM channels WHERE name IN ('General', 'Kitten Room', 'Gaming Room')";
-
-  db.all(getDefaultChannelsSql, (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to fetch default channels", details: err });
-    }
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "No default channels found" });
-    }
-    res.status(200).json({ channels: rows });
-  });
-});
-*/ 
-
 // Private channels where a user can create a channel and invite other users to join, kick users, and see the list of usrers in the channel
 // Create a private channel
 app.post("/createPrivateChannel", (req, res) => {
