@@ -359,11 +359,11 @@ const handleCreatePrivateChannel = () => {
     setShowUserList(false);
   };
 
-  const currentChannel =
-    channels.find((channel) => channel.id === selectedChannel?.id) || {
-      name: "",
-      members: [],
-    };
+  const currentChannel = selectedChannel
+  ? channels.find((channel) => channel.id === selectedChannel?.id)
+  : selectedPrivateChannel
+  ? privateChannels.find((channel) => channel.id === selectedPrivateChannel?.id)
+  : { name: "", members: [] };
 
   return (
     <div className="admin-dashboard">
@@ -434,19 +434,23 @@ const handleCreatePrivateChannel = () => {
       </div>
 
       <div className="chat-section">
-        {selectedChannel ? (
+      {selectedChannel || selectedPrivateChannel ? (
           <div className="channel-chat-container">
             <div className="channel-chat-header">
-              <h2>#{selectedChannel.name}</h2>
+              <h2>#{(selectedChannel || selectedPrivateChannel)?.name}
+              </h2>
               <button
                 className="close-button"
-                onClick={() => setSelectedChannel(null)}
+                onClick={() => {
+                  setSelectedChannel(null);
+                  setSelectedPrivateChannel(null);
+                }}
               >
                 X
               </button>
             </div>
             <Messages
-              selectedChannel={selectedChannel}
+              selectedChannel={selectedChannel || selectedPrivateChannel}
               handleDeleteMessage={handleDeleteMessage}
             />
           </div>
