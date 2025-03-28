@@ -26,13 +26,33 @@ const UserDashboard = () => {
       navigate("/");
       return;
     }
+    //before (channel are visible)
+/**     fetch(http://localhost:8081/getUserChannels/${userId})
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.channels) {
+          setChannels(data.channels);
+          if (data.channels.length > 0) {
+            setSelectedChannel(data.channels[0]);
+          }
+        } else {
+          console.error("Error fetching user channels:", data.error);
+        }
+      })
+      .catch((err) => console.error("Error fetching user channels:", err));
+
+    fetchDirectMessageConversations(userId);
+  }, [navigate]);
+   */
 
     // Fetch channels for the logged-in user
     fetch(`http://localhost:8081/getUserChannels/${userId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.channels) {
-          setChannels(data.channels);
+         // setChannels(data.channels);
+         setChannels(data.channels.filter((channel) => channel.type === "public"));
+         setPrivateChannels(data.channels.filter((channel) => channel.type === "private"));
           if (data.channels.length > 0) {
             setSelectedChannel(data.channels[0]);
           }
@@ -82,7 +102,30 @@ const UserDashboard = () => {
     }
   };
   
-
+  const handleCreatePrivateChannel = () => {
+    const userId = sessionStorage.getItem("userId");
+    if (!newPrivateChannel.trim()) return;
+  
+    fetch("http://localhost:8081/createPrivateChannel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: newPrivateChannel,
+        creatorId: userId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          setPrivateChannels([...privateChannels, data.channel]);
+          setNewPrivateChannel("");
+        } else {
+          console.error("Error creating private channel:", data.error);
+        }
+      })
+      .catch((error) => console.error("Error creating private channel:", error));
+  };
+  
   const handleUserSelect = (userId, userName) => {
     setSelectedUserId(userId);
     setSelectedUserName(userName);
@@ -109,6 +152,25 @@ const UserDashboard = () => {
           ))}
         </ul>
         {channels.length === 0 && <p>No channels available</p>}
+        <h3>Private Channels</h3>
+<ul>
+  {privateChannels.map((channel) => (
+    <li
+      key={channel.id}
+      className={selectedPrivateChannel?.id === channel.id ? "active" : ""}
+      onClick={() => setSelectedPrivateChannel(channel)}
+    >
+      🔒 {channel.name}
+    </li>
+  ))}
+</ul>
+<input
+          type="text"
+          placeholder="New Private Channel"
+          value={newPrivateChannel}
+          onChange={(e) => setNewPrivateChannel(e.target.value)}
+        />
+        <button onClick={handleCreatePrivateChannel}>Create Private Channel</button>
 <h3>Default Channels</h3>
 <ul>
   {defaultChannels.map((channel) => (
