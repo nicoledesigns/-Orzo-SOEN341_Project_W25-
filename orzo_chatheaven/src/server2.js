@@ -219,11 +219,10 @@ app.get("/getUsers", (req, res) => {
 
 
 
-// Get all channels
+// Get all channels added comma
 app.get("/getChannels", (req, res) => {
   const sql = `
-    SELECT c.id AS channel_id, c.name AS channel_name, c.is_private AS is_private
-           GROUP_CONCAT(u.name) AS members
+    SELECT c.id AS channel_id, c.name AS channel_name, c.is_private AS is_private, GROUP_CONCAT(u.name) AS members
     FROM channels c
     LEFT JOIN channel_members cm ON c.id = cm.channel_id
     LEFT JOIN users u ON cm.user_id = u.id

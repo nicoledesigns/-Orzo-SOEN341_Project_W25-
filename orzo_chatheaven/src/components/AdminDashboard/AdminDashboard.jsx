@@ -23,6 +23,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
+    // Fetch public channels
     fetch("http://localhost:8081/getChannels")
       .then((response) => response.json())
       .then((data) => {
@@ -30,7 +31,17 @@ const AdminDashboard = () => {
         setChannels(Array.isArray(data.channels) ? data.channels : []);
       })
       .catch((err) => console.error("Error fetching channels:", err));
-
+  
+    // Fetch default channels
+    fetch("http://localhost:8081/getDefaultChannels")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched default channels:", data);
+        setDefaultChannels(Array.isArray(data.channels) ? data.channels : []);
+      })
+      .catch((err) => console.error("Error fetching default channels:", err));
+  
+    // Fetch users
     fetch("http://localhost:8081/getUsers")
       .then((response) => response.json())
       .then((data) => {
@@ -38,17 +49,19 @@ const AdminDashboard = () => {
         setUsers(Array.isArray(data.users) ? data.users : []);
       })
       .catch((err) => console.error("Error fetching users:", err));
-      // Fetch private channels when the component is loaded or user logs in
+  
+    // Fetch private channels
     const loggedInUserId = sessionStorage.getItem("userId");
     if (loggedInUserId) {
       fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
         .then((response) => response.json())
         .then((data) => {
+          console.log("Fetched private channels:", data);
           setPrivateChannels(Array.isArray(data.channels) ? data.channels : []);
         })
         .catch((err) => console.error("Error fetching private channels:", err));
     }
-}, []); 
+  }, []);  
 
   const handleUserSelection = (userId) => {
     setSelectedUsers((prevSelected) =>
