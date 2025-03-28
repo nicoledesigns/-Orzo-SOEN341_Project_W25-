@@ -1,0 +1,9 @@
+
+7;hey man how you doing;2025-03-18T14:15:10.669Z
+5;im doing good;2025-03-18T14:26:56.227Z
+7;glad to hear that;2025-03-18T14:27:09.091Z
+7;see you at school;2025-03-18T14:27:15.446Z
+5;not that good, im not going today;2025-03-18T14:27:26.089Z
+7;take care of yourself then;2025-03-18T14:27:37.697Z
+5;i will, i will;2025-03-18T14:27:48.969Z
+7;great i have to get going;2025-03-18T14:27:59.941Z

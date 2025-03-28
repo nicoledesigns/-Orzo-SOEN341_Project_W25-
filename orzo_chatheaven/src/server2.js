@@ -5,8 +5,11 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('node:fs');
 const { formatDate } = require('./tools');
+const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
+const ai = new GoogleGenAI( 'apiKey: GEMINI_API_KEY' );
+const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp-image-generation" }); 
 app.use(cors());
 app.use(express.json());
 
@@ -19,6 +22,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
   console.log("Connected to SQLite database!");
 });
+
 
 // User signup
 app.post("/signup", (req, res) => {
