@@ -78,13 +78,15 @@ const AdminDashboard = () => {
           setRequestedChannelIds(ids);
         });
     
-      // ✅ Fetch channels admin is actually a member of
+
       fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
         .then((res) => res.json())
         .then((data) => {
           const privateOnes = (data.channels || []).filter((ch) => ch.is_private === 1);
           setAdminPrivateChannels(privateOnes);
         });
+
+        
     }
     
 
@@ -139,7 +141,7 @@ const AdminDashboard = () => {
       .then((data) => {
         if (data.message) {
           alert("Users added successfully!");
-          refreshAllChannelsAndUpdateSelection(); // ✅ REFRESH UI
+          refreshAllChannelsAndUpdateSelection(); 
         } else {
           alert("Failed to add users: " + data.error);
         }
@@ -164,7 +166,7 @@ const AdminDashboard = () => {
       .then((res) => res.json())
       .then((data) => {
         alert(data.message || "Request sent!");
-        setRequestedChannelIds((prev) => [...prev, channelId]); // ✅ Save locally
+        setRequestedChannelIds((prev) => [...prev, channelId]); 
       })
       .catch((err) => {
         console.error("Join request failed:", err);
@@ -218,17 +220,28 @@ const AdminDashboard = () => {
         setSelectedChannel(null);
         setSelectedPrivateChannel(null);
   
-        // Refresh updated private channels
+        // Refresh memberships
         fetch(`http://localhost:8081/userChannels/${userId}`)
-
           .then((res) => res.json())
-          .then((data) => setPrivateChannels(data.channels || []));
+          .then((data) => {
+            const privateOnes = (data.channels || []).filter(ch => ch.is_private === 1);
+            setAdminPrivateChannels(privateOnes);
+          });
+  
+        // Refresh request list
+        fetch(`http://localhost:8081/getUserChannelRequests/${userId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const ids = (data.requests || []).map((r) => r.channel_id);
+            setRequestedChannelIds(ids);
+          });
       })
       .catch((err) => {
         console.error("Error leaving channel:", err);
         alert("Failed to leave channel.");
       });
   };
+  
   
   
 
@@ -518,32 +531,44 @@ const handleCreatePrivateChannel = () => {
         </ul>
   
         <h3>Private Channels</h3>
-        <ul>
-          {channels
-            .filter((channel) => channel.is_private === 1)
-            .map((channel) => {
-              const isMember = adminPrivateChannels.find((c) => c.id === channel.id);
-              const hasRequested = requestedChannelIds.includes(channel.id);
-  
-              return (
-                <li
-                  key={channel.id}
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                >
-                  <span>#{channel.name}</span>
-                  {isMember ? (
-                    <button onClick={() => setSelectedPrivateChannel(channel)}>Open</button>
-                  ) : hasRequested ? (
-                    <span style={{ color: "gray", fontStyle: "italic", fontSize: "0.9em" }}>
-                      🔒 Request Pending
-                    </span>
-                  ) : (
-                    <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
-                  )}
-                </li>
-              );
-            })}
-        </ul>
+<ul>
+  {channels
+    .filter((channel) => channel.is_private === 1)
+    .map((channel) => {
+      const isMember = adminPrivateChannels.find((c) => c.id === channel.id);
+      const hasRequested = requestedChannelIds.includes(channel.id);
+
+      return (
+        <li
+          key={channel.id}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          <span>#{channel.name}</span>
+          {isMember ? (
+            <button onClick={() => setSelectedPrivateChannel(channel)}>Open</button>
+          ) : hasRequested ? (
+            <span
+              style={{
+                color: "green",
+                fontStyle: "italic",
+                fontSize: "0.9em",
+                marginLeft: "8px"
+              }}
+            >
+              🔒 Request Pending
+            </span>
+          ) : (
+            <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
+          )}
+        </li>
+      );
+    })}
+</ul>
+
   
         <div className="add-channel">
           <input
@@ -578,17 +603,37 @@ const handleCreatePrivateChannel = () => {
         {selectedChannel || selectedPrivateChannel ? (
           <div className="channel-chat-container">
             <div className="channel-chat-header">
-              <h2>#{(selectedChannel || selectedPrivateChannel)?.name}</h2>
-              <button
-                className="close-button"
-                onClick={() => {
-                  setSelectedChannel(null);
-                  setSelectedPrivateChannel(null);
-                }}
-              >
-                X
-              </button>
-            </div>
+  <h2>#{(selectedChannel || selectedPrivateChannel)?.name}</h2>
+
+  {/* Leave button only if the admin is a member of the selected private channel */}
+  {selectedPrivateChannel && adminPrivateChannels.find(c => c.id === selectedPrivateChannel.id) && (
+    <button
+      onClick={handleLeaveChannel}
+      style={{
+        marginLeft: "10px",
+        backgroundColor: "#f44336",
+        color: "white",
+        border: "none",
+        padding: "6px 10px",
+        borderRadius: "5px",
+        cursor: "pointer"
+      }}
+    >
+      Leave Channel
+    </button>
+  )}
+
+  <button
+    className="close-button"
+    onClick={() => {
+      setSelectedChannel(null);
+      setSelectedPrivateChannel(null);
+    }}
+  >
+    X
+  </button>
+</div>
+
             <Messages
               selectedChannel={selectedChannel || selectedPrivateChannel}
               handleDeleteMessage={handleDeleteMessage}

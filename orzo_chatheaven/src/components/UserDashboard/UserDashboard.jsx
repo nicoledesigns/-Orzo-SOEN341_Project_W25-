@@ -181,28 +181,56 @@ const UserDashboard = () => {
         </ul>
 
         <h3>Private Channels</h3>
-        <ul>
-          {privateChannels.map((channel) => {
-            const isMember = userPrivateChannels.find((c) => c.id === channel.id);
-            const hasRequested = requestedChannelIds.includes(channel.id);
+<ul>
+  {privateChannels.map((channel) => {
+    const isMember = userPrivateChannels.find((c) => c.id === channel.id);
+    const hasRequested = requestedChannelIds.includes(channel.id);
 
-            return (
-              <li key={channel.id}>
-                🔒 {channel.name}
-                {isMember ? (
-                  <button onClick={() => {
-                    setSelectedPrivateChannel(channel);
-                    setSelectedChannel(null);
-                  }}>Open</button>
-                ) : hasRequested ? (
-                  <span style={{ fontStyle: "italic", fontSize: "0.9em" }}>Request Pending</span>
-                ) : (
-                  <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+    return (
+      <li
+        key={channel.id}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "6px"
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center" }}>
+          🔒 <span style={{ marginLeft: "6px", fontWeight: "500" }}>#{channel.name}</span>
+          {!isMember && hasRequested && (
+            <span
+              style={{
+                color: "green",
+                fontStyle: "italic",
+                fontSize: "0.85em", // 👈 smaller font
+                marginLeft: "8px"
+              }}
+            >
+              Request Pending
+            </span>
+          )}
+        </span>
+
+        {isMember ? (
+          <button onClick={() => {
+            setSelectedPrivateChannel(channel);
+            setSelectedChannel(null);
+          }}>
+            Open
+          </button>
+        ) : !hasRequested ? (
+          <button onClick={() => handleRequestToJoin(channel.id)}>
+            Request to Join
+          </button>
+        ) : null}
+      </li>
+    );
+  })}
+</ul>
+
+
+
 
         <input
           type="text"
