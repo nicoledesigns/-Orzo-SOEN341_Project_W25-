@@ -86,36 +86,72 @@ const AdminDashboard = () => {
   };
 
   const handleAddUsersToChannel = () => {
-    if (!selectedChannel) {
+    const userId = sessionStorage.getItem("userId");
+  
+    if (!selectedChannel && !selectedPrivateChannel) {
       alert("Please select a channel first!");
       return;
     }
-
-    fetch("http://localhost:8081/addUserToChannel", {
+  
+    if (!userId) {
+      alert("User not identified. Please log in again.");
+      return;
+    }
+  
+    const targetChannel = selectedChannel || selectedPrivateChannel;
+    const isPrivate = selectedPrivateChannel !== null;
+  
+    const url = isPrivate
+      ? "http://localhost:8081/addUserToPrivateChannel"
+      : "http://localhost:8081/addUserToChannel";
+  
+    const payload = isPrivate
+      ? {
+          channelId: targetChannel.id,
+          userIds: selectedUsers,
+          requestedID: userId,
+        }
+      : {
+          channelId: targetChannel.id,
+          userIds: selectedUsers,
+        };
+  
+    fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        channelId: selectedChannel.id,
-        userIds: selectedUsers,
-      }),
+      body: JSON.stringify(payload),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
           alert("Users added successfully!");
-          fetch("http://localhost:8081/getChannels")
-            .then((response) => response.json())
-            .then((data) =>
-              setChannels(Array.isArray(data.channels) ? data.channels : [])
-            );
+  
+          // Refresh private channels if needed
+          if (isPrivate) {
+            fetch(`http://localhost:8081/userChannels/${userId}`)
+              .then((response) => response.json())
+              .then((data) =>
+                setPrivateChannels(Array.isArray(data.channels) ? data.channels : [])
+              );
+          } else {
+            fetch("http://localhost:8081/getChannels")
+              .then((response) => response.json())
+              .then((data) =>
+                setChannels(Array.isArray(data.channels) ? data.channels : [])
+              );
+          }
         } else {
           alert("Failed to add users: " + data.error);
         }
       })
-      .catch((err) => console.error("Error adding users:", err));
-
+      .catch((err) => {
+        console.error("Error adding users:", err);
+        alert("Something went wrong");
+      });
+  
     setSelectedUsers([]);
   };
+  
 
   const handleAddChannel = () => {
     if (newChannel.trim() === "") {
@@ -235,14 +271,12 @@ const handleCreatePrivateChannel = () => {
     return;
   }
 
-
   const loggedInUserId = sessionStorage.getItem("userId");
 
   if (!loggedInUserId) {
     alert("You must be logged in to create a channel!");
     return;
   }
-  console.log("Creating private channel with creatorId:", loggedInUserId);
 
   fetch("http://localhost:8081/createPrivateChannel", {
     method: "POST",
@@ -258,21 +292,22 @@ const handleCreatePrivateChannel = () => {
       return response.json();
     })
     .then((data) => {
-      console.log("Private channel response:", data);
-      if (data.message) {
-        alert("Private Channel added successfully!");
-        setPrivateChannels([
-          ...privateChannels,
-          { id: data.channelId, name: newPrivateChannel, members: [] },
-        ]);
-        setNewPrivateChannel("");
-      }
+      alert("Private Channel added successfully!");
+      setNewPrivateChannel("");
+
+      
+      fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setPrivateChannels(Array.isArray(data.channels) ? data.channels : []);
+        });
     })
     .catch((err) => {
       console.error("Error adding channel:", err);
       alert(err.message || "Something went wrong.");
     });
 };
+
 
   const handleDeleteMessage = (channelId, userId, message, time) => {
     const requestBody = {

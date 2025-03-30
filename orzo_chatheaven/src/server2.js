@@ -623,7 +623,7 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
 // Create a private channel
 app.post("/createPrivateChannel", (req, res) => {
   const { name, creatorId } = req.body;
-  console.log(creatorId)
+
   if (!name || !creatorId) {
     return res.status(400).json({ error: "Invalid input!" });
   }
@@ -639,16 +639,29 @@ app.post("/createPrivateChannel", (req, res) => {
 
     const channelId = this.lastID;
 
-    db.run(insertMemberSql, [channelId, creatorId], function (err) {
+    // 🆕 Create the channel message file
+    const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
+    fs.writeFile(filePath, '', (err) => {
       if (err) {
-        console.error("Error adding creator to private channel:", err);
-        return res.status(500).json({ error: "Failed to add creator to private channel" });
+        console.error("Error creating message file:", err);
+        return res.status(500).json({ error: "Failed to create message file" });
       }
 
-      return res.status(200).json({ message: "Private channel created successfully", channelId });
+      console.log(`Private channel file created: ${filePath}`);
+
+      // ✅ Add the creator to the private channel
+      db.run(insertMemberSql, [channelId, creatorId], function (err) {
+        if (err) {
+          console.error("Error adding creator to private channel:", err);
+          return res.status(500).json({ error: "Failed to add creator to private channel" });
+        }
+
+        return res.status(200).json({ message: "Private channel created successfully", channelId });
+      });
     });
   });
 });
+
 
 
 // Add users to a private channel
@@ -658,9 +671,10 @@ app.post("/addUserToPrivateChannel", (req, res) => {
   if (!channelId || !userIds || !Array.isArray(userIds) || !requestedID) {
     return res.status(400).json({ error: "Invalid input!" });
   }
-  //sql to check if the user is a member of the channel double check it later
+
+
   const Permissionsql = `
-    SELECT c.private, cm.user_id AS isMember 
+    SELECT c.is_private, cm.user_id AS isMember 
     FROM channels c
     LEFT JOIN channel_members cm ON c.id = cm.channel_id AND cm.user_id = ?
     WHERE c.id = ?
@@ -670,30 +684,33 @@ app.post("/addUserToPrivateChannel", (req, res) => {
       console.error("Error checking channel membership:", err);
       return res.status(500).json({ error: "Failed to check channel membership" });
     }
+
     if (!row || !row.isMember) {
       return res.status(403).json({ error: "Not authorized" });
     }
+
+
+    const insertsql = `
+      INSERT INTO channel_members (channel_id, user_id)
+      VALUES (?, ?)
+      ON CONFLICT(channel_id, user_id) DO NOTHING
+    `;
+
+    const dbTasks = userIds.map((userId) =>
+      new Promise((resolve, reject) => {
+        db.run(insertsql, [channelId, userId], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      })
+    );
+
+    Promise.all(dbTasks)
+      .then(() => res.status(200).json({ message: "Users added to channel successfully" }))
+      .catch((err) => res.status(500).json({ error: "Failed to add users", details: err }));
   });
-
-  //sql to add users to the channel
-  const insertsql = `
-    INSERT INTO channel_members (channel_id, user_id)
-    VALUES (?, ?)
-    ON CONFLICT(channel_id, user_id) DO NOTHING
-  `;
-
-  const dbTasks = userIds.map((userId) =>
-    new Promise((resolve, reject) => {
-      db.run(insertsql, [channelId, userId], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    })
-  );
-  Promise.all(dbTasks)
-    .then(() => res.status(200).json({ message: "Users added to channel successfully" }))
-    .catch((err) => res.status(500).json({ error: "Failed to add users", details: err }));
 });
+
 
 
 //seeing which private channels the user is part of
@@ -701,7 +718,7 @@ app.get("/userChannels/:userId", (req, res) => {
   const userId = req.params.userId;
 
   const sql = `
-    SELECT c.id, c.name, c.private 
+    SELECT c.id, c.name, c.is_private 
     FROM channels c
     JOIN channel_members cm ON c.id = cm.channel_id
     WHERE cm.user_id = ?;
@@ -709,9 +726,11 @@ app.get("/userChannels/:userId", (req, res) => {
 
   db.all(sql, [userId], (err, channels) => {
     if (err) return res.status(500).json({ error: "Database error", details: err });
+
     res.status(200).json({ channels });
   });
 });
+
 
 
 // Kick users from a private channel (Only Creator or Admins can kick)
