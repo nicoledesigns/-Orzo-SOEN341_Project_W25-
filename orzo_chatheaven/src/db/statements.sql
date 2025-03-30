@@ -19,5 +19,14 @@ CREATE TABLE channel_members (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS channel_requests (
+  user_id INTEGER NOT NULL,
+  channel_id INTEGER NOT NULL,
+  PRIMARY KEY (user_id, channel_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (channel_id) REFERENCES channels(id)
+);
+
+
 
 ALTER TABLE channels ADD COLUMN is_private INTEGER DEFAULT 0;

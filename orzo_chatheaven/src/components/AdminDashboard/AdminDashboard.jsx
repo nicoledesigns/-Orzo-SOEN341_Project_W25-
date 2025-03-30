@@ -26,6 +26,8 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
   const [requestedChannelIds, setRequestedChannelIds] = useState([]);
+  const [adminPrivateChannels, setAdminPrivateChannels] = useState([]);
+
 
   const navigate = useNavigate();
   
@@ -35,22 +37,16 @@ const AdminDashboard = () => {
       .then((response) => response.json())
       .then((data) => {
         const allChannels = Array.isArray(data.channels) ? data.channels : []
-        setChannels(allChannels); // Store all channels
         
- // Filter default channels (General, Kitten Room, Gaming Room)
- const defaultChannelNames = ["General", "Kitten Room", "Gaming Room"];
- const filteredDefaultChannels = allChannels.filter((channel) =>
-   defaultChannelNames.includes(channel.name)
- );
- setDefaultChannels(filteredDefaultChannels); // Store filtered default channels
+        setChannels(allChannels); // Store all channels
+
 
         const filteredPrivateChannels = allChannels.filter(
         (channel) => channel.is_private === 1
       );
-
-      
       setPrivateChannels(filteredPrivateChannels);
-})
+
+      })
       .catch((err) => console.error("Error fetching channels:", err));
   
     // Fetch default channels
@@ -74,14 +70,25 @@ const AdminDashboard = () => {
     // Fetch private channels
     const loggedInUserId = sessionStorage.getItem("userId");
     if (loggedInUserId) {
-      fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
-        .then((response) => response.json())
+      // Fetch requested channels (already exists)
+      fetch(`http://localhost:8081/getUserChannelRequests/${loggedInUserId}`)
+        .then((res) => res.json())
         .then((data) => {
-          console.log("Fetched private channels:", data);
-          setPrivateChannels(Array.isArray(data.channels) ? data.channels : []);
-        })
-        .catch((err) => console.error("Error fetching private channels:", err));
+          const ids = (data.requests || []).map((r) => r.channel_id);
+          setRequestedChannelIds(ids);
+        });
+    
+      // ✅ Fetch channels admin is actually a member of
+      fetch(`http://localhost:8081/userChannels/${loggedInUserId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const privateOnes = (data.channels || []).filter((ch) => ch.is_private === 1);
+          setAdminPrivateChannels(privateOnes);
+        });
     }
+    
+
+    
   }, []);  
 
   const handleUserSelection = (userId) => {
@@ -213,6 +220,7 @@ const AdminDashboard = () => {
   
         // Refresh updated private channels
         fetch(`http://localhost:8081/userChannels/${userId}`)
+
           .then((res) => res.json())
           .then((data) => setPrivateChannels(data.channels || []));
       })
@@ -349,7 +357,9 @@ const handleCreatePrivateChannel = () => {
   fetch("http://localhost:8081/createPrivateChannel", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: newPrivateChannel, creatorId: loggedInUserId }),
+    body: JSON.stringify({ name: newPrivateChannel, userId: loggedInUserId }),
+
+
   })
     .then((response) => {
       if (!response.ok) {
@@ -435,7 +445,7 @@ const handleCreatePrivateChannel = () => {
     const updatedUsers = users.map((user) =>
       user.id === userId ? { ...user, status: "away" } : user
     );
-    setUsers(updatedUsers); // Assuming you have a state for `users` in your component
+    setUsers(updatedUsers); // Assuming you have a state for users in your component
   
     // Now update the status in the backend
     fetch('/set-away', {
@@ -472,61 +482,69 @@ const handleCreatePrivateChannel = () => {
     <div className="admin-dashboard">
       <div className="sidebar">
         <h1 className="chathaven-title">ChatHaven</h1>
+  
         <h3>Channels</h3>
 <ul>
   {channels
-    .filter((channel) => channel.is_private === 0) // ✅ Only public channels
+    .filter((channel) => channel.is_private === 0)
     .map((channel) => (
       <li
         key={channel.id}
         className={selectedChannel?.id === channel.id ? "active" : ""}
-        onClick={() => setSelectedChannel(channel)}
+        onClick={() => {
+          setSelectedChannel(channel);
+          setSelectedPrivateChannel(null);
+        }}
       >
         #{channel.name}
       </li>
     ))}
 </ul>
 
+  
+
+  
         <h3>Default Channels</h3>
-  <ul>
-    {defaultChannels.map((channel) => (
-      <li
-        key={channel.id}
-        className={selectedChannel?.id === channel.id ? "active" : ""}
-        onClick={() => setSelectedChannel(channel)}
-      >
-        #{channel.name}
-      </li>
-    ))}
-  </ul>
-  <h3>Private Channels</h3>
-<ul>
-{channels
-  .filter((channel) => channel.is_private === 1)
-  .map((channel) => {
-    const isMember = privateChannels.find((c) => c.id === channel.id);
-    const hasRequested = requestedChannelIds.includes(channel.id); // ✅ Check local state
-
-    return (
-      <li
-        key={channel.id}
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
-        <span>#{channel.name}</span>
-        {isMember ? (
-          <button onClick={() => setSelectedPrivateChannel(channel)}>Open</button>
-        ) : hasRequested ? (
-          <span style={{ color: "gray", fontStyle: "italic", fontSize: "0.9em" }}>
-            🔒 Request Pending
-          </span>
-        ) : (
-          <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
-        )}
-      </li>
-    );
-  })}
-
-</ul>
+        <ul>
+          {defaultChannels.map((channel) => (
+            <li
+              key={channel.id}
+              className={selectedChannel?.id === channel.id ? "active" : ""}
+              onClick={() => setSelectedChannel(channel)}
+            >
+              #{channel.name}
+            </li>
+          ))}
+        </ul>
+  
+        <h3>Private Channels</h3>
+        <ul>
+          {channels
+            .filter((channel) => channel.is_private === 1)
+            .map((channel) => {
+              const isMember = adminPrivateChannels.find((c) => c.id === channel.id);
+              const hasRequested = requestedChannelIds.includes(channel.id);
+  
+              return (
+                <li
+                  key={channel.id}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <span>#{channel.name}</span>
+                  {isMember ? (
+                    <button onClick={() => setSelectedPrivateChannel(channel)}>Open</button>
+                  ) : hasRequested ? (
+                    <span style={{ color: "gray", fontStyle: "italic", fontSize: "0.9em" }}>
+                      🔒 Request Pending
+                    </span>
+                  ) : (
+                    <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
+                  )}
+                </li>
+              );
+            })}
+        </ul>
+  
         <div className="add-channel">
           <input
             type="text"
@@ -536,31 +554,31 @@ const handleCreatePrivateChannel = () => {
           />
           <button onClick={handleAddChannel}>Add</button>
         </div>
-        {/* Add New Private Channel */}
-  <div className="add-private-channel">
-    <input
-      type="text"
-      placeholder="Add new private channel"
-      value={newPrivateChannel}
-      onChange={(e) => setNewPrivateChannel(e.target.value)}
-    />
-    <button onClick={handleCreatePrivateChannel}>Add Private</button>
-  </div>
+  
+        <div className="add-private-channel">
+          <input
+            type="text"
+            placeholder="Add new private channel"
+            value={newPrivateChannel}
+            onChange={(e) => setNewPrivateChannel(e.target.value)}
+          />
+          <button onClick={handleCreatePrivateChannel}>Add Private</button>
+        </div>
+  
         <button onClick={() => setShowUserList(!showUserList)}>
           {showUserList ? "Hide User List" : "Start a Direct Message"}
         </button>
-
+  
         <button className="logout-button" onClick={handleLogout}>
           Logout
         </button>
       </div>
-
+  
       <div className="chat-section">
-      {selectedChannel || selectedPrivateChannel ? (
+        {selectedChannel || selectedPrivateChannel ? (
           <div className="channel-chat-container">
             <div className="channel-chat-header">
-              <h2>#{(selectedChannel || selectedPrivateChannel)?.name}
-              </h2>
+              <h2>#{(selectedChannel || selectedPrivateChannel)?.name}</h2>
               <button
                 className="close-button"
                 onClick={() => {
@@ -579,14 +597,14 @@ const handleCreatePrivateChannel = () => {
         ) : (
           <p>Please select a channel to view messages.</p>
         )}
-
+  
         {showUserList && (
           <UserList
             currentUserId={sessionStorage.getItem("userId")}
             onUserSelect={handleUserSelect}
           />
         )}
-
+  
         {selectedUserId && (
           <DirectMessaging
             currentUserId={sessionStorage.getItem("userId")}
@@ -599,13 +617,13 @@ const handleCreatePrivateChannel = () => {
           />
         )}
       </div>
-
+  
       <div className="profile-section">
         <h3>{currentChannel.name}</h3>
         <p>
-          Description: This is your space to collaborate and discuss all things{" "}
-          {currentChannel.name}-related.
+          Description: This is your space to collaborate and discuss all things {currentChannel.name}-related.
         </p>
+  
         <h4>Members</h4>
         <ul>
           {currentChannel.members?.map((member, index) => (
@@ -614,44 +632,40 @@ const handleCreatePrivateChannel = () => {
             </li>
           ))}
         </ul>
-
+  
         <h4>All Users</h4>
         <ul className="user-list">
-  {users.length > 0 ? (
-    users.map((user) => (
-      <li key={user.id} className="user-item">
-        <div className="user-info">
-          <span className="user-name">{user.name}</span>
-          <span className={`status-indicator ${user.status}`}>
-            {user.status === "online" && "🟢 Online"}
-            {user.status === "away" && "🟡 Away (Inactive)"}
-            {user.status === "offline" && "⚪ Offline"}
-            
-              {user.id.toString() === sessionStorage.getItem("userId") && (
-             <button className="away-btn" onClick={() => setAwayStatus(user.id)}>
-            Set Away
-            </button>
-            )}
-           
-          </span>
-          {user.status === "offline" && (
-            <span className="last-seen">
-            {user.status === "offline" && user.last_seen
-              ? `Last seen: ${new Date(user.last_seen).toLocaleString()}`
-              : "Last seen: Unknown"}
-          </span>
+          {users.length > 0 ? (
+            users.map((user) => (
+              <li key={user.id} className="user-item">
+                <div className="user-info">
+                  <span className="user-name">{user.name}</span>
+                  <span className={`status-indicator ${user.status}`}>
+                    {user.status === "online" && "🟢 Online"}
+                    {user.status === "away" && "🟡 Away (Inactive)"}
+                    {user.status === "offline" && "⚪ Offline"}
+                    {user.id.toString() === sessionStorage.getItem("userId") && (
+                      <button className="away-btn" onClick={() => setAwayStatus(user.id)}>
+                        Set Away
+                      </button>
+                    )}
+                  </span>
+                  {user.status === "offline" && (
+                    <span className="last-seen">
+                      {user.last_seen
+                        ? `Last seen: ${new Date(user.last_seen).toLocaleString()}`
+                        : "Last seen: Unknown"}
+                    </span>
+                  )}
+                </div>
+              </li>
+            ))
+          ) : (
+            <p>No users found</p>
           )}
-        </div>
-      </li>
-    ))
-  ) : (
-    <p>No users found</p>
-  )}
-</ul>
-
-
+        </ul>
+  
         <h4>Add Users to Channel</h4>
-
         <div className="user-selection" style={{ maxHeight: "200px", overflowY: "auto" }}>
           {users.map((user) => (
             <div key={user.id} className="user-checkbox">
@@ -665,11 +679,10 @@ const handleCreatePrivateChannel = () => {
             </div>
           ))}
         </div>
-
+  
         <button onClick={handleAddUsersToChannel}>Add Selected Users</button>
       </div>
     </div>
   );
 };
-
 export default AdminDashboard;
