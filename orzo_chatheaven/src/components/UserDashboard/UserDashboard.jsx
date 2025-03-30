@@ -55,6 +55,13 @@ fetch(`http://localhost:8081/getUserChannels/${userId}`)
     // Store all channels
     setChannels(data.channels);
 
+// Filter default channels
+const defaultChannelNames = ["General", "Kitten Room", "Gaming Room"];
+const filteredDefaultChannels = data.channels.filter((channel) =>
+  defaultChannelNames.includes(channel.name)
+);
+setDefaultChannels(filteredDefaultChannels); // Store filtered default channels
+
     // Separate public and private channels
     setPrivateChannels(data.channels.filter((channel) => channel.type === "private"));
 
