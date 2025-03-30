@@ -25,6 +25,8 @@ const AdminDashboard = () => {
   const [showUserList, setShowUserList] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
+  const [requestedChannelIds, setRequestedChannelIds] = useState([]);
+
 
   const navigate = useNavigate();
   
@@ -35,8 +37,8 @@ const AdminDashboard = () => {
       .then((data) => {
         const allChannels = Array.isArray(data.channels) ? data.channels : []
         
-        const nonPirvate = allChannels.filter((channel) => channel.is_private === 0)
-        setChannels(nonPirvate);
+        setChannels(allChannels); // Store all channels
+
 
         const filteredPrivateChannels = allChannels.filter(
         (channel) => channel.is_private === 1
@@ -125,21 +127,7 @@ const AdminDashboard = () => {
       .then((data) => {
         if (data.message) {
           alert("Users added successfully!");
-  
-          // Refresh private channels if needed
-          if (isPrivate) {
-            fetch(`http://localhost:8081/userChannels/${userId}`)
-              .then((response) => response.json())
-              .then((data) =>
-                setPrivateChannels(Array.isArray(data.channels) ? data.channels : [])
-              );
-          } else {
-            fetch("http://localhost:8081/getChannels")
-              .then((response) => response.json())
-              .then((data) =>
-                setChannels(Array.isArray(data.channels) ? data.channels : [])
-              );
-          }
+          refreshAllChannelsAndUpdateSelection(); // ✅ REFRESH UI
         } else {
           alert("Failed to add users: " + data.error);
         }
@@ -151,6 +139,84 @@ const AdminDashboard = () => {
   
     setSelectedUsers([]);
   };
+  
+
+  const handleRequestToJoin = (channelId) => {
+    const userId = sessionStorage.getItem("userId");
+  
+    fetch("http://localhost:8081/requestToJoinChannel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, channelId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.message || "Request sent!");
+        setRequestedChannelIds((prev) => [...prev, channelId]); // ✅ Save locally
+      })
+      .catch((err) => {
+        console.error("Join request failed:", err);
+        alert("Couldn't send join request");
+      });
+  };
+  
+  const refreshAllChannelsAndUpdateSelection = () => {
+    fetch("http://localhost:8081/getChannels")
+      .then((response) => response.json())
+      .then((data) => {
+        const allChannels = Array.isArray(data.channels) ? data.channels : [];
+        setChannels(allChannels);
+  
+        const filteredPrivateChannels = allChannels.filter(
+          (channel) => channel.is_private === 1
+        );
+        setPrivateChannels(filteredPrivateChannels);
+  
+        // 👇 Refresh selectedChannel / selectedPrivateChannel with updated member list
+        if (selectedChannel) {
+          const updated = allChannels.find((ch) => ch.id === selectedChannel.id);
+          if (updated) setSelectedChannel(updated);
+        } else if (selectedPrivateChannel) {
+          const updated = allChannels.find((ch) => ch.id === selectedPrivateChannel.id);
+          if (updated) setSelectedPrivateChannel(updated);
+        }
+      })
+      .catch((err) => console.error("Error refreshing channels:", err));
+  };
+  
+  
+
+  const handleLeaveChannel = () => {
+    const userId = sessionStorage.getItem("userId");
+    const channel = selectedChannel || selectedPrivateChannel;
+  
+    if (!userId || !channel) {
+      alert("Something went wrong. Try again.");
+      return;
+    }
+  
+    fetch("http://localhost:8081/leaveChannel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, channelId: channel.id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.message || "Left the channel.");
+        setSelectedChannel(null);
+        setSelectedPrivateChannel(null);
+  
+        // Refresh updated private channels
+        fetch(`http://localhost:8081/userChannels/${userId}`)
+          .then((res) => res.json())
+          .then((data) => setPrivateChannels(data.channels || []));
+      })
+      .catch((err) => {
+        console.error("Error leaving channel:", err);
+        alert("Failed to leave channel.");
+      });
+  };
+  
   
 
   const handleAddChannel = () => {
@@ -230,40 +296,37 @@ const AdminDashboard = () => {
       alert("Please select a private channel first!");
       return;
     }
-
-    const UserId = localStorage.getItem("userId"); // Get logged-in user ID
-
-    if (!UserId) {
+  
+    const userId = sessionStorage.getItem("userId");
+  
+    if (!userId) {
       alert("User not identified. Please log in again.");
       return;
     }
-
+  
     fetch("http://localhost:8081/addUserToPrivateChannel", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         channelId: selectedPrivateChannel.id,
         userIds: selectedUsers,
-        requestedID: UserId,  // ✅ Now sending requestedID
+        requestedID: userId,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
           alert("Users added to private channel successfully!");
-          fetch(`http://localhost:8081/userChannels/${UserId}`)
-            .then((response) => response.json())
-            .then((data) => 
-              setPrivateChannels(Array.isArray(data.channels) ? data.channels : [])
-            );
+          refreshAllChannelsAndUpdateSelection(); // ✅ REFRESH UI
         } else {
           alert("Failed to add users: " + data.error);
         }
       })
       .catch((err) => console.error("Error adding users to private channel:", err));
-
+  
     setSelectedUsers([]);
-};
+  };
+  
 
 const handleCreatePrivateChannel = () => {
   if (!newPrivateChannel.trim()) {
@@ -405,17 +468,20 @@ const handleCreatePrivateChannel = () => {
       <div className="sidebar">
         <h1 className="chathaven-title">ChatHaven</h1>
         <h3>Channels</h3>
-        <ul>
-          {channels.map((channel) => (
-            <li
-              key={channel.id}
-              className={selectedChannel?.id === channel.id ? "active" : ""}
-              onClick={() => setSelectedChannel(channel)}
-            >
-              #{channel.name}
-            </li>
-          ))}
-        </ul>
+<ul>
+  {channels
+    .filter((channel) => channel.is_private === 0) // ✅ Only public channels
+    .map((channel) => (
+      <li
+        key={channel.id}
+        className={selectedChannel?.id === channel.id ? "active" : ""}
+        onClick={() => setSelectedChannel(channel)}
+      >
+        #{channel.name}
+      </li>
+    ))}
+</ul>
+
         <h3>Default Channels</h3>
   <ul>
     {defaultChannels.map((channel) => (
@@ -428,18 +494,34 @@ const handleCreatePrivateChannel = () => {
       </li>
     ))}
   </ul>
-        <h3>Private Channels</h3>
-        <ul>
-          {privateChannels.map((channel) => (
-            <li
-              key={channel.id}
-              className={selectedPrivateChannel?.id === channel.id ? "active" : ""}
-              onClick={() => setSelectedPrivateChannel(channel)}
-            >
-              #{channel.name}
-            </li>
-          ))}
-        </ul>
+  <h3>Private Channels</h3>
+<ul>
+{channels
+  .filter((channel) => channel.is_private === 1)
+  .map((channel) => {
+    const isMember = privateChannels.find((c) => c.id === channel.id);
+    const hasRequested = requestedChannelIds.includes(channel.id); // ✅ Check local state
+
+    return (
+      <li
+        key={channel.id}
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <span>#{channel.name}</span>
+        {isMember ? (
+          <button onClick={() => setSelectedPrivateChannel(channel)}>Open</button>
+        ) : hasRequested ? (
+          <span style={{ color: "gray", fontStyle: "italic", fontSize: "0.9em" }}>
+            🔒 Request Pending
+          </span>
+        ) : (
+          <button onClick={() => handleRequestToJoin(channel.id)}>Request to Join</button>
+        )}
+      </li>
+    );
+  })}
+
+</ul>
         <div className="add-channel">
           <input
             type="text"

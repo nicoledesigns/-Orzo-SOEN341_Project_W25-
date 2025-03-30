@@ -628,10 +628,10 @@ app.post("/createPrivateChannel", (req, res) => {
     return res.status(400).json({ error: "Invalid input!" });
   }
 
-  const insertChannelSql = "INSERT INTO channels (name, is_private) VALUES (?, ?)";
+  const insertChannelSql = "INSERT INTO channels (name, is_private, creator_id) VALUES (?, ?, ?)";
   const insertMemberSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
 
-  db.run(insertChannelSql, [name, 1], function (err) {
+  db.run(insertChannelSql, [name, 1, creatorId], function (err) {
     if (err) {
       console.error("Error creating private channel:", err);
       return res.status(500).json({ error: "Failed to create private channel" });
@@ -639,7 +639,7 @@ app.post("/createPrivateChannel", (req, res) => {
 
     const channelId = this.lastID;
 
-    // 🆕 Create the channel message file
+
     const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
     fs.writeFile(filePath, '', (err) => {
       if (err) {
@@ -649,7 +649,7 @@ app.post("/createPrivateChannel", (req, res) => {
 
       console.log(`Private channel file created: ${filePath}`);
 
-      // ✅ Add the creator to the private channel
+
       db.run(insertMemberSql, [channelId, creatorId], function (err) {
         if (err) {
           console.error("Error adding creator to private channel:", err);
