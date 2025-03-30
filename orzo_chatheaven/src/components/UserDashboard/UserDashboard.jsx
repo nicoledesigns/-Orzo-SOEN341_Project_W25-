@@ -62,6 +62,12 @@ const filteredDefaultChannels = data.channels.filter((channel) =>
 );
 setDefaultChannels(filteredDefaultChannels); // Store filtered default channels
 
+          // Remove default channels from general channels list
+          const remainingChannels = data.channels.filter(
+            (channel) => !defaultChannelNames.includes(channel.name)
+          );
+          setChannels(remainingChannels); // Store only non-default channels in the main list
+
     // Separate public and private channels
     setPrivateChannels(data.channels.filter((channel) => channel.type === "private"));
 

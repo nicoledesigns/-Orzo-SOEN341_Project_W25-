@@ -36,13 +36,18 @@ const AdminDashboard = () => {
       .then((data) => {
         const allChannels = Array.isArray(data.channels) ? data.channels : []
         setChannels(allChannels); // Store all channels
-        
+
  // Filter default channels (General, Kitten Room, Gaming Room)
  const defaultChannelNames = ["General", "Kitten Room", "Gaming Room"];
  const filteredDefaultChannels = allChannels.filter((channel) =>
    defaultChannelNames.includes(channel.name)
  );
  setDefaultChannels(filteredDefaultChannels); // Store filtered default channels
+          // Remove default channels from general channels list
+          const remainingChannels = data.channels.filter(
+            (channel) => !defaultChannelNames.includes(channel.name)
+          );
+          setChannels(remainingChannels); // Store only non-default channels in the main list
 
         const filteredPrivateChannels = allChannels.filter(
         (channel) => channel.is_private === 1
