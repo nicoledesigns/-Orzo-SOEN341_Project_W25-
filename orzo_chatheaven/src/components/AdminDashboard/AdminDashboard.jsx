@@ -10,12 +10,12 @@ const AdminDashboard = () => {
   const [channels, setChannels] = useState([]);
   const [newChannel, setNewChannel] = useState("");
   const [defaultChannels, setDefaultChannels] = useState([]);
-  const [privateChannels, setPrivateChannels] = useState([]); // Add state for private channels
+  const [privateChannels, setPrivateChannels] = useState([]); 
 
-  const [newPrivateChannel, setNewPrivateChannel] = useState(""); // Add state for new private channel
+  const [newPrivateChannel, setNewPrivateChannel] = useState(""); 
 
 
-  const [selectedPrivateChannel, setSelectedPrivateChannel] = useState(null); // Add state for selected private channel
+  const [selectedPrivateChannel, setSelectedPrivateChannel] = useState(null); 
 
 
 
@@ -89,6 +89,20 @@ const AdminDashboard = () => {
     }
   }, []);  
 
+  const loggedInUserId = sessionStorage.getItem("userId");
+if (loggedInUserId) {
+  fetch(`http://localhost:8081/getUserChannelRequests/${loggedInUserId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      const ids = (data.requests || []).map((r) => r.channel_id);
+      setRequestedChannelIds(ids); 
+    })
+    .catch((err) => {
+      console.error("Error fetching requested channels:", err);
+    });
+}
+
+
   const handleUserSelection = (userId) => {
     setSelectedUsers((prevSelected) =>
       prevSelected.includes(userId)
@@ -137,7 +151,7 @@ const AdminDashboard = () => {
       .then((data) => {
         if (data.message) {
           alert("Users added successfully!");
-          refreshAllChannelsAndUpdateSelection(); // ✅ REFRESH UI
+          refreshAllChannelsAndUpdateSelection(); 
         } else {
           alert("Failed to add users: " + data.error);
         }
@@ -149,6 +163,8 @@ const AdminDashboard = () => {
   
     setSelectedUsers([]);
   };
+
+  
   
 
   const handleRequestToJoin = (channelId) => {
@@ -162,7 +178,7 @@ const AdminDashboard = () => {
       .then((res) => res.json())
       .then((data) => {
         alert(data.message || "Request sent!");
-        setRequestedChannelIds((prev) => [...prev, channelId]); // ✅ Save locally
+        setRequestedChannelIds((prev) => [...prev, channelId]); 
       })
       .catch((err) => {
         console.error("Join request failed:", err);
@@ -182,7 +198,7 @@ const AdminDashboard = () => {
         );
         setPrivateChannels(filteredPrivateChannels);
   
-        // 👇 Refresh selectedChannel / selectedPrivateChannel with updated member list
+
         if (selectedChannel) {
           const updated = allChannels.find((ch) => ch.id === selectedChannel.id);
           if (updated) setSelectedChannel(updated);
@@ -226,6 +242,7 @@ const AdminDashboard = () => {
         alert("Failed to leave channel.");
       });
   };
+  
   
   
 
@@ -282,7 +299,7 @@ const AdminDashboard = () => {
       console.log("Default channels created:", data);
       alert("Default channels created successfully!");
       
-      // Optionally, you could fetch the default channels to update the UI
+
       fetchDefaultChannels();
     } catch (err) {
       console.error("Error creating default channels:", err);
@@ -290,7 +307,7 @@ const AdminDashboard = () => {
     }
   };
   
-  // Optional: Fetch the default channels to update the UI after creation
+
   const fetchDefaultChannels = async () => {
     try {
       const response = await fetch("http://localhost:8081/getDefaultChannels");
@@ -327,7 +344,7 @@ const AdminDashboard = () => {
       .then((data) => {
         if (data.message) {
           alert("Users added to private channel successfully!");
-          refreshAllChannelsAndUpdateSelection(); // ✅ REFRESH UI
+          refreshAllChannelsAndUpdateSelection(); 
         } else {
           alert("Failed to add users: " + data.error);
         }
@@ -354,7 +371,9 @@ const handleCreatePrivateChannel = () => {
   fetch("http://localhost:8081/createPrivateChannel", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: newPrivateChannel, creatorId: loggedInUserId }),
+    body: JSON.stringify({ name: newPrivateChannel, userId: loggedInUserId }),
+
+
   })
     .then((response) => {
       if (!response.ok) {
@@ -440,7 +459,7 @@ const handleCreatePrivateChannel = () => {
     const updatedUsers = users.map((user) =>
       user.id === userId ? { ...user, status: "away" } : user
     );
-    setUsers(updatedUsers); // Assuming you have a state for `users` in your component
+    setUsers(updatedUsers); 
   
     // Now update the status in the backend
     fetch('/set-away', {
@@ -459,6 +478,8 @@ const handleCreatePrivateChannel = () => {
       console.error('Error:', error);
     });
   };
+
+
 
   // Called when a user is selected from the DM user list
   const handleUserSelect = (userId, userName) => {
@@ -480,7 +501,7 @@ const handleCreatePrivateChannel = () => {
         <h3>Channels</h3>
 <ul>
   {channels
-    .filter((channel) => channel.is_private === 0) // ✅ Only public channels
+    .filter((channel) => channel.is_private === 0) 
     .map((channel) => (
       <li
         key={channel.id}
@@ -510,7 +531,7 @@ const handleCreatePrivateChannel = () => {
   .filter((channel) => channel.is_private === 1)
   .map((channel) => {
     const isMember = privateChannels.find((c) => c.id === channel.id);
-    const hasRequested = requestedChannelIds.includes(channel.id); // ✅ Check local state
+    const hasRequested = requestedChannelIds.includes(channel.id); 
 
     return (
       <li
@@ -564,18 +585,29 @@ const handleCreatePrivateChannel = () => {
       {selectedChannel || selectedPrivateChannel ? (
           <div className="channel-chat-container">
             <div className="channel-chat-header">
-              <h2>#{(selectedChannel || selectedPrivateChannel)?.name}
-              </h2>
-              <button
-                className="close-button"
-                onClick={() => {
-                  setSelectedChannel(null);
-                  setSelectedPrivateChannel(null);
-                }}
-              >
-                X
-              </button>
-            </div>
+  <h2>#{(selectedChannel || selectedPrivateChannel)?.name}</h2>
+
+  {/* Leave button for private channels */}
+  {selectedPrivateChannel && (
+    <button
+      onClick={handleLeaveChannel}
+      style={{ marginLeft: "10px", backgroundColor: "#f44336", color: "white", border: "none", padding: "6px 10px", borderRadius: "5px" }}
+    >
+      Leave Channel
+    </button>
+  )}
+
+  <button
+    className="close-button"
+    onClick={() => {
+      setSelectedChannel(null);
+      setSelectedPrivateChannel(null);
+    }}
+  >
+    X
+  </button>
+</div>
+
             <Messages
               selectedChannel={selectedChannel || selectedPrivateChannel}
               handleDeleteMessage={handleDeleteMessage}

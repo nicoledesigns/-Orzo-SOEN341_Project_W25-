@@ -520,6 +520,31 @@ app.post("/requestToJoinChannel", (req, res) => {
   });
 });
 
+// Get requested channel IDs for a specific user
+app.get("/getUserChannelRequests/:userId", (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  const sql = "SELECT channel_id FROM channel_requests WHERE user_id = ?";
+
+  db.all(sql, [userId], (err, rows) => {
+    if (err) {
+      console.error("Error fetching channel requests:", err);
+      return res.status(500).json({ error: "Failed to fetch channel requests" });
+    }
+
+    const requests = rows.map((row) => ({
+      channel_id: row.channel_id
+    }));
+
+    res.status(200).json({ requests });
+  });
+});
+
+
 //create away function Nicole
 app.post("/set-away", (req, res) => {
   const { userId } = req.body;
@@ -622,25 +647,26 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
 // Private channels where a user can create a channel and invite other users to join, kick users, and see the list of usrers in the channel
 // Create a private channel
 app.post("/createPrivateChannel", (req, res) => {
-  const { name, creatorId } = req.body;
+  const { name, userId } = req.body; // renamed to userId
+  console.log("Incoming request body:", req.body);
 
-  if (!name || !creatorId) {
+
+  if (!name || !userId) {
     return res.status(400).json({ error: "Invalid input!" });
   }
 
-  const insertChannelSql = "INSERT INTO channels (name, is_private, creator_id) VALUES (?, ?, ?)";
+  const insertChannelSql = "INSERT INTO channels (name, is_private) VALUES (?, ?)";
   const insertMemberSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
 
-  db.run(insertChannelSql, [name, 1, creatorId], function (err) {
+  db.run(insertChannelSql, [name, 1], function (err) {
     if (err) {
       console.error("Error creating private channel:", err);
       return res.status(500).json({ error: "Failed to create private channel" });
     }
 
     const channelId = this.lastID;
-
-
     const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
+
     fs.writeFile(filePath, '', (err) => {
       if (err) {
         console.error("Error creating message file:", err);
@@ -649,8 +675,7 @@ app.post("/createPrivateChannel", (req, res) => {
 
       console.log(`Private channel file created: ${filePath}`);
 
-
-      db.run(insertMemberSql, [channelId, creatorId], function (err) {
+      db.run(insertMemberSql, [channelId, userId], function (err) {
         if (err) {
           console.error("Error adding creator to private channel:", err);
           return res.status(500).json({ error: "Failed to add creator to private channel" });
