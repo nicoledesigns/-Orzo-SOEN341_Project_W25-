@@ -37,6 +37,19 @@ const UserDashboard = () => {
       .then((data) => {
         const all = data.channels || [];
         setChannels(all.filter((c) => c.is_private === 0));
+        // Filter default channels
+const defaultChannelNames = ["General", "Kitten Room", "Gaming Room"];
+const filteredDefaultChannels = data.channels.filter((channel) =>
+  defaultChannelNames.includes(channel.name)
+);
+setDefaultChannels(filteredDefaultChannels); // Store filtered default channels
+
+    // Remove default channels from general channels list
+    const remainingChannels = data.channels.filter(
+      (channel) => !defaultChannelNames.includes(channel.name)
+    );
+    setChannels(remainingChannels); // Store only non-default channels in the main list
+
         setPrivateChannels(all.filter((c) => c.is_private === 1));
       });
 
@@ -179,7 +192,18 @@ const UserDashboard = () => {
             </li>
           ))}
         </ul>
-
+        <h3>Default Channels</h3>
+        <ul>
+          {defaultChannels.map((channel) => (
+            <li
+              key={channel.id}
+              className={selectedChannel?.id === channel.id ? "active" : ""}
+              onClick={() => setSelectedChannel(channel)}
+            >
+              #{channel.name}
+            </li>
+          ))}
+        </ul>
         <h3>Private Channels</h3>
 <ul>
   {privateChannels.map((channel) => {
