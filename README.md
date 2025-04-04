@@ -8,7 +8,8 @@ Karan: Backend developper
 <br/>
 Eesha: Designer and frontend developper
 <br/>
-Houda: Frontend developper
+Houda Filali 40276607: Frontend developper
+houda-filali
 <br/>
 Nicole: Designer and Frontend developer
 <br/>
