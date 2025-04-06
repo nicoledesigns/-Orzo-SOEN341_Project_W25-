@@ -13,7 +13,9 @@ houda-filali
 <br/>
 Nicole: Designer and Frontend developer
 <br/>
-Edwin: Project manager and backend developper
+Edwin Achkar 40199695: Project manager and backend developper
+edwinach
+<br/>
 
 ## Features  
 
