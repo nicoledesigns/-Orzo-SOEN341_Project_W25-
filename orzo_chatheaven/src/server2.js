@@ -1,15 +1,22 @@
 const express = require('express');
 const sqlite3 = require('sqlite3');
+require('dotenv').config();
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('node:fs');
 const { formatDate } = require('./tools');
-const { GoogleGenAI } = require("@google/genai");
+const { analyzeString } = require('./tools');
+const { generateAnswer } = require('./tools');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 
 const app = express();
-const ai = new GoogleGenAI( 'apiKey: GEMINI_API_KEY' );
-const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp-image-generation" }); 
+const api_key = "AI";
+console.log(`api key is ${api_key}`)
+const genAi = new GoogleGenerativeAI(api_key)
+const modelImage = genAi.getGenerativeModel({ model: "gemini-2.0-flash-exp-image-generation" });
+const model = genAi.getGenerativeModel({ model: "gemini-2.0-flash" })
 app.use(cors());
 app.use(express.json());
 
@@ -59,65 +66,65 @@ app.post("/signup", (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required!" });
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required!" });
+  }
+
+  const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)";
+
+  db.get(sql, [email], (err, row) => {
+    if (err) {
+      console.error("Login error:", err);
+      return res.status(500).json({ error: "Login failed" });
     }
 
-    const sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(?)";
+    if (!row) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-    db.get(sql, [email], (err, row) => {
-        if (err) {
-            console.error("Login error:", err);
-            return res.status(500).json({ error: "Login failed" });
-        }
+    bcrypt.compare(password, row.password, (err, result) => {
+      if (err) {
+        console.error("Password comparison error:", err);
+        return res.status(500).json({ error: "Login failed" });
+      }
 
-        if (!row) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        bcrypt.compare(password, row.password, (err, result) => {
-            if (err) {
-                console.error("Password comparison error:", err);
-                return res.status(500).json({ error: "Login failed" });
-            }
-
-            if (result) {
-                // Update user status to online
-                const updateStatusSQL = "UPDATE users SET status = 'online', last_seen = datetime('now') WHERE id = ?";
-                db.run(updateStatusSQL, [row.id], (updateErr) => {
-                    if (updateErr) {
-                        console.error("Error updating user status:", updateErr);
-                    }
-                });
-
-                // Fetch the updated user list to send to the frontend
-                const getUsersSQL = "SELECT id, name, status, last_seen FROM users";
-                db.all(getUsersSQL, [], (usersErr, users) => {
-                    if (usersErr) {
-                        console.error("Error fetching users:", usersErr);
-                        return res.status(500).json({ error: "Failed to fetch updated users" });
-                    }
-
-                    return res.json({
-                        message: "Login successful",
-                        user: {
-                            id: row.id,
-                            name: row.name,
-                            email: row.email,
-                            role: row.role,
-                            status: "online",
-                            last_seen: new Date().toISOString(),
-                        },
-                        users: users // Send updated user list to frontend
-                    });
-                });
-            } else {
-                return res.status(401).json({ error: "Invalid credentials" });
-            }
+      if (result) {
+        // Update user status to online
+        const updateStatusSQL = "UPDATE users SET status = 'online', last_seen = datetime('now') WHERE id = ?";
+        db.run(updateStatusSQL, [row.id], (updateErr) => {
+          if (updateErr) {
+            console.error("Error updating user status:", updateErr);
+          }
         });
+
+        // Fetch the updated user list to send to the frontend
+        const getUsersSQL = "SELECT id, name, status, last_seen FROM users";
+        db.all(getUsersSQL, [], (usersErr, users) => {
+          if (usersErr) {
+            console.error("Error fetching users:", usersErr);
+            return res.status(500).json({ error: "Failed to fetch updated users" });
+          }
+
+          return res.json({
+            message: "Login successful",
+            user: {
+              id: row.id,
+              name: row.name,
+              email: row.email,
+              role: row.role,
+              status: "online",
+              last_seen: new Date().toISOString(),
+            },
+            users: users // Send updated user list to frontend
+          });
+        });
+      } else {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
     });
+  });
 });
 
 // Add a new channel
@@ -202,23 +209,23 @@ app.post("/addUserToChannel", (req, res) => {
 
 // Get all users
 app.get("/getUsers", (req, res) => {
-    const sql = "SELECT id, name, status, last_seen FROM users";
+  const sql = "SELECT id, name, status, last_seen FROM users";
 
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            console.error("Error fetching users:", err);
-            return res.status(500).json({ error: "Failed to fetch users" });
-        }
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      return res.status(500).json({ error: "Failed to fetch users" });
+    }
 
-        const users = rows.map((row) => ({
-            id: row.id,
-            name: row.name,
-            status: row.status,
-            last_seen: row.last_seen || null // Ensure null instead of undefined
-        }));
+    const users = rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      status: row.status,
+      last_seen: row.last_seen || null // Ensure null instead of undefined
+    }));
 
-        res.status(200).json({ users });
-    });
+    res.status(200).json({ users });
+  });
 });
 
 
@@ -257,6 +264,11 @@ app.post("/sendMessage", (req, res) => {
   const date = new Date();
   const formattedDate = formatDate(date);
   const formattedMessage = `\n${userId};${message};${formattedDate}`;
+
+  if (analyzeString(message)) {
+    generateAnswer(message)
+  }
+
   fs.appendFile(filePath, formattedMessage, (err) => {
     if (err) {
       console.error("Failed to send message:", err);
@@ -498,7 +510,7 @@ app.post("/requestToJoinChannel", (req, res) => {
   }
   //check already made requests 
   const checkRequestSql = "SELECT * FROM channel_requests WHERE user_id = ? AND channel_id = ?";
-  
+
   db.get(checkRequestSql, [userId, channelId], (err, row) => {
     if (err) {
       console.error("Error checking request:", err);
@@ -512,7 +524,7 @@ app.post("/requestToJoinChannel", (req, res) => {
 
     // Insert request if none found
     const insertSql = "INSERT INTO channel_requests (user_id, channel_id) VALUES (?, ?)";
-    
+
     db.run(insertSql, [userId, channelId], function (err) {
       if (err) {
         console.error("Error requesting to join channel:", err);
@@ -523,7 +535,7 @@ app.post("/requestToJoinChannel", (req, res) => {
     });
   });
 });
-  
+
 //create away function Nicole
 app.post("/set-away", (req, res) => {
   const { userId } = req.body;
@@ -560,22 +572,22 @@ app.post("/createDefaultChannels", (req, res) => { // Define a POST route for cr
   const checkSql = "SELECT COUNT(*) AS count FROM channels WHERE name = ?"; // SQL query to check if a channel already exists
   const insertSql = "INSERT INTO channels (name) VALUES (?)"; // SQL query to insert a new channel
 
-  const dbTasks = defaultChannels.map((name) => 
+  const dbTasks = defaultChannels.map((name) =>
     new Promise((resolve, reject) => { // Create a new Promise for each channel
       db.get(checkSql, [name], (err, row) => { // Execute the check query
-        if (err) return reject(err); 
-        if (row.count > 0) return resolve(); 
+        if (err) return reject(err);
+        if (row.count > 0) return resolve();
 
         db.run(insertSql, [name], function (err) { // Execute the insert query
-          if (err) reject(err); 
-          else resolve(); 
+          if (err) reject(err);
+          else resolve();
         });
       });
     })
   );
 
   Promise.all(dbTasks) // Wait for all database tasks to complete
-    .then(() => res.status(200).json({ message: "Default channels initialized successfully" })) 
+    .then(() => res.status(200).json({ message: "Default channels initialized successfully" }))
     .catch((err) => res.status(500).json({ error: "Failed to create default channels", details: err }));
 });
 
@@ -584,7 +596,7 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
   console.log("Auto-joining users to default channels..."); // Add a log for testing
   const defaultChannels = ["General", "Kitten Room", "Gaming Room"];
 
-  const getAllUsersSql = "SELECT id FROM users"; 
+  const getAllUsersSql = "SELECT id FROM users";
   const getChannelIdSql = "SELECT id FROM channels WHERE name = ?";
   const checkMembershipSql = "SELECT COUNT(*) AS count FROM channel_members WHERE channel_id = ? AND user_id = ?";
   const insertSql = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
@@ -599,13 +611,13 @@ app.post("/autoJoinDefaultChannels", (req, res) => {
         new Promise((resolve, reject) => {
           db.get(getChannelIdSql, [name], (err, row) => {
             if (err) return reject(err);
-            if (!row) return resolve(); 
+            if (!row) return resolve();
 
             const channelId = row.id;
 
             db.get(checkMembershipSql, [channelId, userId], (err, membershipRow) => {
               if (err) return reject(err);
-              if (membershipRow.count > 0) return resolve(); 
+              if (membershipRow.count > 0) return resolve();
 
               db.run(insertSql, [channelId, userId], function (err) {
                 if (err) reject(err);
@@ -638,7 +650,7 @@ app.get("/getDefaultChannels", (req, res) => {
     res.status(200).json({ channels: rows });
   });
 });
-*/ 
+*/
 
 // Private channels where a user can create a channel and invite other users to join, kick users, and see the list of usrers in the channel
 // Create a private channel
@@ -673,7 +685,7 @@ app.post("/createPrivateChannel", (req, res) => {
 
 // Add users to a private channel
 app.post("/addUserToPrivateChannel", (req, res) => {
-  const { channelId, userIds , requestedID } = req.body;
+  const { channelId, userIds, requestedID } = req.body;
 
   if (!channelId || !userIds || !Array.isArray(userIds) || !requestedID) {
     return res.status(400).json({ error: "Invalid input!" });
@@ -771,6 +783,31 @@ app.post("/kickUserFromPrivateChannel", (req, res) => {
       res.status(200).json({ message: "User kicked from private channel successfully" });
     });
   });
+});
+
+app.get("/orzo_Ai/text", async (req, res) => {
+  try {
+    const prompt = req.query;
+    const question = prompt.prompt;
+    const result = await model.generateContent(question);
+    const response = await result.response.candidates[0]["content"]["parts"][0]["text"];
+    res.status(200).json({ response });
+  } catch (error) {
+    res.status(500).json({ error })
+    console.log("popop" + error)
+  }
+
+});
+
+app.get("/orzo_Ai/image", async (req, res) => {
+  try {
+
+
+  } catch (error) {
+    res.status(500).json({ error })
+    console.log("popop" + error)
+  }
+
 });
 
 // Start the server

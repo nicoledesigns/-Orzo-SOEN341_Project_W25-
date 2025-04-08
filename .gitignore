@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+orzo_chatheaven/src/keys.json
+orzo_chatheaven/src/.env
+orzo_chatheaven/.env

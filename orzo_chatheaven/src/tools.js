@@ -13,4 +13,34 @@ function formatDate(date) {
     return formattedDate;
 }
 
+function analyzeString(string) {
+    const pattern = /(?<!\w)@orzoAi(?!\w)/;
+    return pattern.test(string);
+}
+
+async function generateAnswer(prompt) {
+    try {
+        console.log(prompt)
+        const response = await fetch(`"http://localhost:8081/orzo_Ai/text?prompt=${prompt}"`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data)
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
 module.exports = { formatDate };
+module.exports = { analyzeString };
+module.exports = { generateAnswer }; 
