@@ -5,9 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('node:fs');
-const { formatDate } = require('./tools');
-const { analyzeString } = require('./tools');
-const { generateAnswer } = require('./tools');
+const { formatDate, analyzeString, generateAnswer  } = require('./tools');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 
@@ -262,11 +260,12 @@ app.post("/sendMessage", (req, res) => {
   }
   const filePath = path.join(__dirname, 'db', `#${channelId}.txt`);
   const date = new Date();
+  console.log(message)
   const formattedDate = formatDate(date);
   const formattedMessage = `\n${userId};${message};${formattedDate}`;
 
-  if (analyzeString(message)) {
-    generateAnswer(message)
+  if (analyzeString(message, channelId)) {
+    generateAnswer(message, channelId)
   }
 
   fs.appendFile(filePath, formattedMessage, (err) => {
@@ -790,7 +789,10 @@ app.get("/orzo_Ai/text", async (req, res) => {
     const prompt = req.query;
     const question = prompt.prompt;
     const result = await model.generateContent(question);
-    const response = await result.response.candidates[0]["content"]["parts"][0]["text"];
+    let response = await result.response.candidates[0]["content"]["parts"][0]["text"];
+   
+    response = response.replace(/\n/g, '');
+    // response = response.replace(new RegExp('\n', 'g'), ' ');
     res.status(200).json({ response });
   } catch (error) {
     res.status(500).json({ error })

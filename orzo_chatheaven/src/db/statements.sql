@@ -18,5 +18,8 @@
 --     FOREIGN KEY (channel_id) REFERENCES channels(id),
 --     FOREIGN KEY (user_id) REFERENCES users(id)
 -- );
-ALTER TABLE users ADD COLUMN lastLogin TEXT;
-ALTER TABLE users ADD COLUMN lastLogout TEXT;
+-- ALTER TABLE users ADD COLUMN lastLogin TEXT;
+-- ALTER TABLE users ADD COLUMN lastLogout TEXT;
+
+INSERT INTO channel_members (channel_id, user_id)
+SELECT id, 15 FROM channels;
