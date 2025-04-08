@@ -10,7 +10,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 
 const app = express();
-const api_key = "AI";
+
+const api_key = process.env.gemini_key;
 console.log(`api key is ${api_key}`)
 const genAi = new GoogleGenerativeAI(api_key)
 const modelImage = genAi.getGenerativeModel({ model: "gemini-2.0-flash-exp-image-generation" });
