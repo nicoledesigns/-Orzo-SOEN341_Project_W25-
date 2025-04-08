@@ -20,6 +20,7 @@ function analyzeString(string) {
 
 async function generateAnswer(prompt, channel_id) {
     try {
+        prompt = prompt + " make your answer short and sweet"
         console.log(prompt)
         const response = await fetch(`http://localhost:8081/orzo_Ai/text?prompt=${prompt}`,
             {
