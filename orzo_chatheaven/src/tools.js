@@ -15,8 +15,8 @@ function formatDate(date) {
 
 function analyzeString(string, channelId) {
     const pattern = /(?<!\w)@orzoAi(?!\w)/;
-    constImagePattern = /(?<!\w)@orzoAi generate an image(?!\w)/;
-    if(pattern.test(string)){
+    const ImagePattern = /(?<!\w)@orzoAi generate an image(?!\w)/;
+    if(ImagePattern.test(string)){
         generateImage(string, channelId)
     }
     else if(pattern.test(string)){
@@ -27,6 +27,7 @@ function analyzeString(string, channelId) {
 
 async function generateAnswer(prompt, channel_id) {
     try {
+        console.log("text")
         prompt = prompt + " make your answer short and sweet"
         console.log(prompt)
         const response = await fetch(`http://localhost:8081/orzo_Ai/text?prompt=${prompt}`,
@@ -54,6 +55,8 @@ async function generateAnswer(prompt, channel_id) {
 
 async function generateImage(prompt, channel_id) {
     try {
+        console.log("image")
+        prompt = prompt + " with cartoony style"
         console.log(`Image prompt: ${prompt}`);
 
         const response = await fetch(`http://localhost:8081/orzo_Ai/image?prompt=${encodeURIComponent(prompt)}`, {
