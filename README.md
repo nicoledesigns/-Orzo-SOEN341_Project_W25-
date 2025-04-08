@@ -6,7 +6,7 @@ Yassine: Backend developper
 <br/>
 Karan: Backend developper
 <br/>
-Eesha: Designer and frontend developper
+Eesha: 40189246: Designer and frontend developper
 <br/>
 Houda Filali 40276607: Frontend developper
 houda-filali
