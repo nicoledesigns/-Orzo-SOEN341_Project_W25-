@@ -13,8 +13,15 @@ function formatDate(date) {
     return formattedDate;
 }
 
-function analyzeString(string) {
+function analyzeString(string, channelId) {
     const pattern = /(?<!\w)@orzoAi(?!\w)/;
+    constImagePattern = /(?<!\w)@orzoAi generate an image(?!\w)/;
+    if(pattern.test(string)){
+        generateImage(string, channelId)
+    }
+    else if(pattern.test(string)){
+        generateAnswer(string, channelId)
+    }
     return pattern.test(string);
 }
 
@@ -44,6 +51,34 @@ async function generateAnswer(prompt, channel_id) {
     }
 
 }
+
+async function generateImage(prompt, channel_id) {
+    try {
+        console.log(`Image prompt: ${prompt}`);
+
+        const response = await fetch(`http://localhost:8081/orzo_Ai/image?prompt=${encodeURIComponent(prompt)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error: ${response.status} - ${response.statusText} - ${JSON.stringify(errorData)}`);
+        }
+
+        const data = await response.json();
+        const imageUrl = data.imageUrl; // assumes your Express API sends { imageUrl: "https://..." }
+
+        await sendAiMessage(channel_id, imageUrl);
+        console.log(`Image URL sent: ${imageUrl}`);
+    } catch (error) {
+        console.error('Error generating image:', error);
+        throw error;
+    }
+}
+
 
 async function sendAiMessage(channelId, message) {
     const aiUserId = 15; 

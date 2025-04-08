@@ -7,14 +7,16 @@ const bcrypt = require('bcrypt');
 const fs = require('node:fs');
 const { formatDate, analyzeString, generateAnswer  } = require('./tools');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const OpenAI = require('openai').default;
 
 
 const app = express();
 
 const api_key = process.env.gemini_key;
 const genAi = new GoogleGenerativeAI(api_key)
-const modelImage = genAi.getGenerativeModel({ model: "gemini-2.0-flash-exp-image-generation" });
 const model = genAi.getGenerativeModel({ model: "gemini-2.0-flash" })
+const dalle_key = process.env.dalle_key;
+const openai = new OpenAI({apiKey: dalle_key});
 app.use(cors());
 app.use(express.json());
 
@@ -264,9 +266,8 @@ app.post("/sendMessage", (req, res) => {
   const formattedDate = formatDate(date);
   const formattedMessage = `\n${userId};${message};${formattedDate}`;
 
-  if (analyzeString(message, channelId)) {
-    generateAnswer(message, channelId)
-  }
+  
+  analyzeString(message, channelId)
 
   fs.appendFile(filePath, formattedMessage, (err) => {
     if (err) {
@@ -802,14 +803,21 @@ app.get("/orzo_Ai/text", async (req, res) => {
 });
 
 app.get("/orzo_Ai/image", async (req, res) => {
+  const { prompt } = req.query;
+
   try {
+    const response = await openai.images.generate({
+      prompt,
+      n: 1,
+      size: '512x512', // can also be 256x256 or 1024x1024
+    });
 
-
+    const imageUrl = response.data[0].url;
+    res.json({ imageUrl });
   } catch (error) {
-    res.status(500).json({ error })
-    console.log("popop" + error)
+    console.error("the error is ", error);
+    res.status(500).json({ error: 'Failed to generate image' });
   }
-
 });
 
 // Start the server
