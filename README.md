@@ -2,7 +2,7 @@
 In today's digital world, finding a platform that facilitates both team collaboration and personal communication can be challenging. Many platforms are either too complex or fail to offer the right balance of privacy, customization, and ease of use. ChatHaven solves this by offering an easy-to-use platform where you can create channels, share media, and chat privately. It’s organized, customizable, and has strong privacy features, making it perfect for both group and one-on-one communication.
 
 # Roles
-Yassine: Backend developper
+Yassine Abdellatif 40279279: Backend developper
 <br/>
 Karan: Backend developper
 <br/>
