@@ -17,3 +17,39 @@ discussed about the backend issues, worked on fixing website not starting errors
 Members: Nicole, Houda, Yassine, Eesha, Karan		
 															
 															
+Sprint 2:
+
+February 21:
+Discussed about:
+-the implementation of 3 user stories
+-github action for the cicd pipeline
+-divided the tasks to be done during sprint 2
+
+
+March 7:
+-fixed issues with the backend
+-write the front-end for group messaging (Houda + Nicole)
+- enhance front-end features 
+
+
+Sprint 3:
+
+March 14:
+Discussed about:
+-the implementation of direct messaging, frontend and backend
+-the user interface and experiance of direct messaging
+-divided the tasks in front end and back end then divided tasks by team members to be done during sprint 3
+
+
+March 21:
+-discussed issues with default channels in terms of when user signs up automatically assigned to channel
+-discussed issues with default channels in terms of appearing in default channels section
+-discussed issues with update of timestamp
+
+Sprint 4:
+
+April 8:
+-Distribution of Tasks for the report and presentation
+-update of the readme
+-Discussion about merging the branch
+-Discussion about the gen-API.
