@@ -10,7 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const dbPath = path.join(__dirname, 'db', 'orzo_chatheaven.db');
+const dbPath = process.env.NODE_ENV === "test"
+  ? path.join(__dirname, "db", "test_orzo_chatheaven.db")
+  : path.join(__dirname, "db", "orzo_chatheaven.db");
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -805,3 +807,8 @@ app.post("/kickUserFromPrivateChannel", (req, res) => {
 app.listen(8081, () => {
   console.log("Server is listening on http://localhost:8081");
 });
+
+
+
+
+module.exports = { app, server };
