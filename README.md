@@ -45,7 +45,7 @@ edwinach
     -   called anywhere in chat by using **@orzoAi** followed by the prompt.
     -   **Orzo ai** text:
         -   answer to your questions.
-    -   **Members** image generation:
+    -   **Orzo ai** image generation:
         -   Can generate images by using the **@orzoAi generate an image** followed by what you want an image of.
 
 ---
