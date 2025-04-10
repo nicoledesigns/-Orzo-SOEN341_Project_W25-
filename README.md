@@ -1,10 +1,12 @@
-# Description 
+# Description
+
 In today's digital world, finding a platform that facilitates both team collaboration and personal communication can be challenging. Many platforms are either too complex or fail to offer the right balance of privacy, customization, and ease of use. ChatHaven solves this by offering an easy-to-use platform where you can create channels, share media, and chat privately. It’s organized, customizable, and has strong privacy features, making it perfect for both group and one-on-one communication.
 
 # Roles
+
 Yassine Abdellatif 40279279: Backend developper
 <br/>
-Karan: Backend developper
+Karan Kumar 40277342: Backend developper github : zekaran30
 <br/>
 Eesha: 40189246: Designer and frontend developper
 <br/>
@@ -17,33 +19,43 @@ Edwin Achkar 40199695: Project manager and backend developper
 edwinach
 <br/>
 
-## Features  
+## Features
 
-### Baseline Features  
-- **Text Channels for Group Communication**  
-  - Users can join channels. 
-  - Messages sent in a channel are visible to all users in that channel.  
+### Baseline Features
 
-- **Direct Messaging Between Users**  
-  - Users can message other users directly.  
-  - Conversations via direc message are private and can only be seen by the participants.  
+-   **Text Channels for Group Communication**
 
-- **Role-Based User Permissions**  
-  - Two roles: **Admin** and **Member**.  
-  - **Admins** can:
-    - Create/delete channels.  
-  - **Members** can:
-    - Send and view messages within allowed channels.  
+    -   Users can join channels.
+    -   Messages sent in a channel are visible to all users in that channel.
+
+-   **Direct Messaging Between Users**
+
+    -   Users can message other users directly.
+    -   Conversations via direc message are private and can only be seen by the participants.
+
+-   **Role-Based User Permissions**
+
+    -   Two roles: **Admin** and **Member**.
+    -   **Admins** can:
+        -   Create/delete channels.
+    -   **Members** can:
+        -   Send and view messages within allowed channels.
+
+-   **Orzo Ai assitant**
+    -   called anywhere in chat by using **@orzoAi** followed by the prompt.
+    -   **Orzo ai** text:
+        -   answer to your questions.
+    -   **Members** image generation:
+        -   Can generate images by using the **@orzoAi generate an image** followed by what you want an image of.
 
 ---
 
 ## Technologies Used
 
-- **Frontend**: React.js  
-- **Backend**: Node.js with Express.js
-- **Database**: SQLite
+-   **Frontend**: React.js
+-   **Backend**: Node.js with Express.js
+-   **Database**: SQLite
 
 ---
 
-## Installation  
-
+## Installation
