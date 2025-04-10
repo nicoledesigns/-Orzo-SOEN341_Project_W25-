@@ -1,12 +1,20 @@
 const express = require('express');
 const sqlite3 = require('sqlite3');
+require('dotenv').config();
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('node:fs');
-const { formatDate } = require('./tools');
+const { formatDate, analyzeString, generateAnswer } = require('./tools');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const OpenAI = require('openai').default;
 
 const app = express();
+const api_key = process.env.gemini_key;
+const genAi = new GoogleGenerativeAI(api_key)
+const model = genAi.getGenerativeModel({ model: "gemini-2.0-flash" })
+const dalle_key = process.env.dalle_key;
+const openai = new OpenAI({ apiKey: dalle_key });
 app.use(cors());
 app.use(express.json());
 
@@ -255,6 +263,7 @@ app.post("/sendMessage", (req, res) => {
   const date = new Date();
   const formattedDate = formatDate(date);
   const formattedMessage = `\n${userId};${message};${formattedDate}`;
+  analyzeString(message, channelId);
   fs.appendFile(filePath, formattedMessage, (err) => {
     if (err) {
       console.error("Failed to send message:", err);
@@ -801,6 +810,42 @@ app.post("/kickUserFromPrivateChannel", (req, res) => {
       res.status(200).json({ message: "User kicked from private channel successfully" });
     });
   });
+});
+
+app.get("/orzo_Ai/text", async (req, res) => {
+  try {
+    const prompt = req.query;
+    const question = prompt.prompt;
+    const result = await model.generateContent(question);
+    let response = await result.response.candidates[0]["content"]["parts"][0]["text"];
+
+    response = response.replace(/\n/g, '');
+    // response = response.replace(new RegExp('\n', 'g'), ' ');
+    res.status(200).json({ response });
+  } catch (error) {
+    res.status(500).json({ error })
+    console.log("popop" + error)
+  }
+
+});
+
+app.get("/orzo_Ai/image", async (req, res) => {
+  const { prompt } = req.query;
+
+  try {
+    const response = await openai.images.generate({
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      //model: 'dalle-3'
+    });
+
+    const imageUrl = response.data[0].url;
+    res.json({ imageUrl });
+  } catch (error) {
+    console.error("the error is ", error);
+    res.status(500).json({ error: 'Failed to generate image' });
+  }
 });
 
 // Start the server
