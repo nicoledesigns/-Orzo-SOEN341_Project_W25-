@@ -4,6 +4,7 @@ CREATE TABLE users (
     email TEXT NOT NULL, 
     password TEXT NOT NULL, 
     role TEXT NOT NULL
+    status TEXT NOT NULL
 );
 
 CREATE TABLE channels (
