@@ -20,7 +20,9 @@ const openai = new OpenAI({apiKey: dalle_key});
 app.use(cors());
 app.use(express.json());
 
-const dbPath = path.join(__dirname, 'db', 'orzo_chatheaven.db');
+const dbPath = process.env.NODE_ENV === "test"
+  ? path.join(__dirname, "db", "test_orzo_chatheaven.db")
+  : path.join(__dirname, "db", "orzo_chatheaven.db");
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -90,13 +92,30 @@ app.post('/login', (req, res) => {
         return res.status(500).json({ error: "Login failed" });
       }
 
-      if (result) {
-        // Update user status to online
-        const updateStatusSQL = "UPDATE users SET status = 'online', last_seen = datetime('now') WHERE id = ?";
-        db.run(updateStatusSQL, [row.id], (updateErr) => {
-          if (updateErr) {
-            console.error("Error updating user status:", updateErr);
-          }
+        if (!row) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        bcrypt.compare(password, row.password, (err, result) => {
+            if (err) {
+                console.error("Password comparison error:", err);
+                return res.status(500).json({ error: "Login failed" });
+            }
+
+            if (result) {
+                return res.json({
+                    message: "Login successful",
+                    user: {
+                        id: row.id, 
+                        name: row.name,
+                        email: row.email,
+                        role: row.role
+                    }
+                });
+            } else {
+                console.log("Wrong password");
+                return res.status(401).json({ error: "Invalid credentials" });
+            }
         });
 
         // Fetch the updated user list to send to the frontend
@@ -119,10 +138,7 @@ app.post('/login', (req, res) => {
             },
             users: users // Send updated user list to frontend
           });
-        });
-      } else {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+        });  
     });
   });
 });
@@ -821,6 +837,11 @@ app.get("/orzo_Ai/image", async (req, res) => {
 });
 
 // Start the server
-app.listen(8081, () => {
-  console.log("Server is listening on http://localhost:8081");
+const server = app.listen(8081, () => {
+    console.log("Server is listening on http://localhost:8081");
 });
+
+
+
+
+module.exports = { app, server };
