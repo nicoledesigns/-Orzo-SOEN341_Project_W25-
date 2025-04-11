@@ -59,9 +59,13 @@ edwinach
 ---
 
 ## Installation
+- API Keys: Copy and paste your GEMINI_KEY and DALLE_KEY into the .env file located in the orzo_chatheaven directory
+- Install Dependencies:
 - npm install --force
+- Start the application:
 - npm start
-- Then, open the application in Safari or Chrome.
+- Access the application:
+- Open the application in Safari or Chrome.
 
 ---
 
