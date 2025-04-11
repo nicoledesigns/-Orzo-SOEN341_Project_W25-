@@ -13,7 +13,7 @@ Eesha: 40189246: Designer and frontend developper
 Houda Filali 40276607: Frontend developper
 houda-filali
 <br/>
-Nicole: Designer and Frontend developer
+Nicole 40284018: Designer and Frontend developer
 <br/>
 Edwin Achkar 40199695: Project manager and backend developper
 edwinach
@@ -82,10 +82,3 @@ Breakdown chart;
 Contribution log;
 Burndown charts;
 
-## Members
-Houda Filali 40276607
-Eesha Patel 40189246
-Nicole Antoun 40284018
-Yasssine 40279279
-Karan 40277342
-Edwin 40199695
