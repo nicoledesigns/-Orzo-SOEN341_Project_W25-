@@ -81,3 +81,11 @@ All meeting minutes;
 Breakdown chart;
 Contribution log;
 Burndown charts;
+
+## Members
+Houda Filali 40276607
+Eesha Patel 40189246
+Nicole Antoun 40284018
+Yasssine 40279279
+Karan 40277342
+Edwin 40199695
