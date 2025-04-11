@@ -59,3 +59,6 @@ edwinach
 ---
 
 ## Installation
+- npm install --force
+- npm start
+- open on safari/chrome
