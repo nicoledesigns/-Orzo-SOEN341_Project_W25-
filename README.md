@@ -69,15 +69,15 @@ Edwin Achkar 40199695: Project manager and backend developper : edwinach
 ---
 
 ## Documentation
-Folder for Sprint 1 is named Sprint 1.
-Folder for Sprint 2 is named Sprint 2.
-Folder for Sprint 3 is named Sprint 3.
-Folder for Sprint 4 is named Sprint 4.
+Folder for Sprint 1 is named Sprint 1.<br/>
+Folder for Sprint 2 is named Sprint 2.<br/>
+Folder for Sprint 3 is named Sprint 3.<br/>
+Folder for Sprint 4 is named Sprint 4.<br/>
 Each Sprint folder contains:
 1. One file documenting the meeting minutes.
-2. One file linking to an Excel sheet that includes:
-All meeting minutes;
-Breakdown chart;
-Contribution log;
-Burndown charts;
+2. One file linking to an Excel sheet that includes:<br/>
+- All meeting minutes;<br/>
+- Breakdown chart;<br/>
+- Contribution log;<br/>
+- Burndown charts;<br/>
 
