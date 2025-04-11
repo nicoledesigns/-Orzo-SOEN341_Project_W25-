@@ -13,7 +13,7 @@ Eesha: 40189246: Designer and frontend developper
 Houda Filali 40276607: Frontend developper
 houda-filali
 <br/>
-Nicole 40284018: Designer and Frontend developer
+Nicole 40284018: Designer and Frontend developer, github : nicoledesigns
 <br/>
 Edwin Achkar 40199695: Project manager and backend developper
 edwinach
