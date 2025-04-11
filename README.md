@@ -61,4 +61,19 @@ edwinach
 ## Installation
 - npm install --force
 - npm start
-- open on safari/chrome
+- Then, open the application in Safari or Chrome.
+
+---
+
+## Documentation
+- Folder for Sprint 1 is named Sprint 1
+- Folder for Sprint 2 is named Sprint 2
+- Folder for Sprint 3 is named Sprint 3
+- Folder for Sprint 4 is named Sprint 4
+- Each Sprint folder contains:
+-     One file documenting the meeting minutes
+-     One file linking to an Excel sheet that includes:
+-         All meeting minutes
+-         Breakdown chart
+-         Contribution log
+-         Burndown charts
