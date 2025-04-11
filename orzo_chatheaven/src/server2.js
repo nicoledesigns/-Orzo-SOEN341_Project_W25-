@@ -17,6 +17,8 @@ const dalle_key = process.env.dalle_key;
 const openai = new OpenAI({ apiKey: dalle_key });
 app.use(cors());
 app.use(express.json());
+let adminUsers = [];
+
 
 const dbPath = process.env.NODE_ENV === "test"
   ? path.join(__dirname, "db", "test_orzo_chatheaven.db")
@@ -56,6 +58,10 @@ app.post("/signup", (req, res) => {
           return res.status(500).json({ error: "Signup failed" });
         }
         console.log("User registered:", this.lastID);
+        if (role === 'admin' || role === "Admin") {
+          adminUsers.push(toString(this.lastID));
+          loadAdmins();
+        }
         return res
           .status(201)
           .json({ message: "User registered successfully", userId: this.lastID });
@@ -324,9 +330,24 @@ app.get("/loadMessages/:channelId", (req, res) => {
   });
 });
 
-//isAdmin is not working!! 
+
+function loadAdmins() {
+  db.all("SELECT id FROM users WHERE role = ?", ['admin'], (err, rows) => {
+    if (err) {
+      return console.error("Error fetching admins:", err.message);
+    }
+    // Extract just the IDs of the admins
+    adminUsers = rows.map(row => row.id.toString().trim());
+    console.log("Admins loaded:", adminUsers);
+  });
+}
+
+loadAdmins();
+
+
+//isAdmin is working now hehe!! 
 const isAdmin = (userId) => {
-  const adminUsers = ["7"];
+  console.log(adminUsers)
   return adminUsers.includes(String(userId).trim());
 };
 
