@@ -24,7 +24,7 @@ const allowedColors = [
   "#ff8c00", "#9400d3", "#00ced1", "#ffd700", "#dc143c"
 ];
 
-const Messages = ({ selectedChannel, handleDeleteMessage }) => {
+const Messages = ({ selectedChannel, handleDeleteMessage, isAdmin }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userColors, setUserColors] = useState({});
@@ -39,7 +39,7 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
   const userId = sessionStorage.getItem("userId");
   const userName = sessionStorage.getItem("userName");
   // Check if the current user is an admin for deleting a message
-  //const isAdmin = userName === "Admin";
+  // const isAdmin = userName === "Admin";
 
 
   // Fetch messages when the selected channel changes or after sending a new message.
@@ -184,7 +184,7 @@ const Messages = ({ selectedChannel, handleDeleteMessage }) => {
         </div>
         <div className="chat-messages">
           {messages.map((msg, index) => {
-            const isAdmin = userId === "7"; // check if userID correspond to an ADMIN
+            //const isAdmin = userId === "7"; // check if userID correspond to an ADMIN
             const alignmentClass = (String(msg.userId) === String(userId)) ? "my-message" : "other-message";
             return (
               <div

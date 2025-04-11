@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "chokidar": "^4.0.3",
+    "events": "^3.3.0",
+    "openai": "^4.93.0"
+  },
+  "devDependencies": {
+    "source-map-js": "^1.2.1"
+  }
+}

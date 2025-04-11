@@ -13,12 +13,13 @@ const AdminDashboard = () => {
   const [privateChannels, setPrivateChannels] = useState([]); // Add state for private channels
 
   const [newPrivateChannel, setNewPrivateChannel] = useState(""); // Add state for new private channel
+  const isAdmin = true;
 
 
   const [selectedPrivateChannel, setSelectedPrivateChannel] = useState(null); // Add state for selected private channel
 
 
-
+  
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -398,8 +399,7 @@ const handleCreatePrivateChannel = () => {
       alert(err.message || "Something went wrong.");
     });
 };
-
-
+  // Handle delete message
   const handleDeleteMessage = (channelId, userId, message, time) => {
     const requestBody = {
       userId,
@@ -634,10 +634,12 @@ const handleCreatePrivateChannel = () => {
   </button>
 </div>
 
-            <Messages
-              selectedChannel={selectedChannel || selectedPrivateChannel}
-              handleDeleteMessage={handleDeleteMessage}
-            />
+<Messages
+        selectedChannel={selectedChannel || selectedPrivateChannel}
+        handleDeleteMessage={handleDeleteMessage}
+        isAdmin={isAdmin} // Passing the isAdmin state as a prop
+
+            />  
           </div>
         ) : (
           <p>Please select a channel to view messages.</p>
