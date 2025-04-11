@@ -4,19 +4,17 @@ In today's digital world, finding a platform that facilitates both team collabor
 
 # Roles
 
-Yassine Abdellatif 40279279: Backend developper
+Yassine Abdellatif 40279279: Backend developper : HanmaTyson
 <br/>
 Karan Kumar 40277342: Backend developper github : zekaran30
 <br/>
-Eesha: 40189246: Designer and frontend developper
+Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel
 <br/>
-Houda Filali 40276607: Frontend developper
-houda-filali
+Houda Filali 40276607: Frontend developper : houda-filali
 <br/>
 Nicole 40284018: Designer and Frontend developer, github : nicoledesigns
 <br/>
-Edwin Achkar 40199695: Project manager and backend developper
-edwinach
+Edwin Achkar 40199695: Project manager and backend developper : edwinach
 <br/>
 
 ## Features
