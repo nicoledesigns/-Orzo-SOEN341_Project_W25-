@@ -4,19 +4,17 @@ In today's digital world, finding a platform that facilitates both team collabor
 
 # Roles
 
-Yassine Abdellatif 40279279: Backend developper
+Yassine Abdellatif 40279279: Backend developper : HanmaTyson
 <br/>
 Karan Kumar 40277342: Backend developper github : zekaran30
 <br/>
-Eesha: 40189246: Designer and frontend developper
+Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel
 <br/>
-Houda Filali 40276607: Frontend developper
-houda-filali
+Houda Filali 40276607: Frontend developper : houda-filali
 <br/>
-Nicole: Designer and Frontend developer
+Nicole 40284018: Designer and Frontend developer, github : nicoledesigns
 <br/>
-Edwin Achkar 40199695: Project manager and backend developper
-edwinach
+Edwin Achkar 40199695: Project manager and backend developper : edwinach
 <br/>
 
 ## Features
@@ -59,3 +57,27 @@ edwinach
 ---
 
 ## Installation
+1. API Keys: Copy and paste your **gemini_key** and **dalle_key** into the .env file located in the orzo_chatheaven directory
+2. cd orzo_chatheaven
+3. Install Dependencies:
+- npm install --force
+4. Start the application:
+- npm start
+5. Access the application:
+- Open the application in Safari or Chrome.
+
+---
+
+## Documentation
+Folder for Sprint 1 is named Sprint 1.<br/>
+Folder for Sprint 2 is named Sprint 2.<br/>
+Folder for Sprint 3 is named Sprint 3.<br/>
+Folder for Sprint 4 is named Sprint 4.<br/>
+Each Sprint folder contains:
+1. One file documenting the meeting minutes.
+2. One file linking to an Excel sheet that includes:<br/>
+- All meeting minutes;<br/>
+- Breakdown chart;<br/>
+- Contribution log;<br/>
+- Burndown charts;<br/>
+
