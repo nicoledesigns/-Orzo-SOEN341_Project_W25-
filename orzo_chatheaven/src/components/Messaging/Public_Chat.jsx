@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';  // Add this at the top of the file
 
 import React, { useState, useEffect } from "react";
 const emojiList = [
@@ -278,4 +279,13 @@ const Messages = ({ selectedChannel, handleDeleteMessage, isAdmin }) => {
   );
 };
 
+PublicChat.propTypes = {
+  selectedChannel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    members: PropTypes.array.isRequired,
+  }).isRequired,
+  handleDeleteMessage: PropTypes.func.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
+};
 export default Messages;
