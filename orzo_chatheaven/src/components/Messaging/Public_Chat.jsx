@@ -279,7 +279,7 @@ const Messages = ({ selectedChannel, handleDeleteMessage, isAdmin }) => {
   );
 };
 
-PublicChat.propTypes = {
+Messages.propTypes = {
   selectedChannel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
