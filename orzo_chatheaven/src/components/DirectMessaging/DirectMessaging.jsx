@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./DirectMessaging.css";
+import PropTypes from 'prop-types';  // Import PropTypes at the top
+
 const emojiList = [
   "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",       
   "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",       
@@ -25,6 +27,13 @@ const DirectMessaging = ({ currentUserId, receiverId, receiverName, onClose }) =
     setMessage((prevMessage) => prevMessage + emoji);
     setShowEmojiPicker(false); // Optionally hide picker after selection
   };
+
+DirectMessaging.propTypes = {
+  currentUserId: PropTypes.string.isRequired,
+  receiverId: PropTypes.string.isRequired,
+  receiverName: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 
   // Load messages between the current user and the selected receiver
   const loadMessages = () => {
