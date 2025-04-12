@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./UserList.css";
+import PropTypes from 'prop-types';  // Add this at the top of the file
+
 
 const UserList = ({ currentUserId, onUserSelect }) => {
   const [users, setUsers] = useState([]);
@@ -35,6 +37,12 @@ const UserList = ({ currentUserId, onUserSelect }) => {
       </ul>
     </div>
   );
+};
+
+// PropTypes should be defined outside the component for better practice
+UserList.propTypes = {
+  currentUserId: PropTypes.string.isRequired,
+  onUserSelect: PropTypes.func.isRequired,
 };
 
 export default UserList;
