@@ -12,7 +12,7 @@ Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel rc: 100
 <br/>
 Houda Filali 40276607: Frontend developper : houda-filali rc: 100 ri: 100 IC:100
 <br/>
-Nicole 40284018: Designer and Frontend developer, github : nicoledesigns rc:
+Nicole 40284018: Designer and Frontend developer, github : nicoledesigns rc: 79 ri: 46.2 IC:62.6
 <br/>
 Edwin Achkar 40199695: Project manager and backend developper : edwinach rc: 30 ri: 9 IC: 19.5
 <br/>
