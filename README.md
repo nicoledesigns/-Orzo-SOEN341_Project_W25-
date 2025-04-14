@@ -14,7 +14,7 @@ Houda Filali 40276607: Frontend developper : houda-filali rc: 100 ri: 100 IC:100
 <br/>
 Nicole 40284018: Designer and Frontend developer, github : nicoledesigns rc:
 <br/>
-Edwin Achkar 40199695: Project manager and backend developper : edwinach rc:
+Edwin Achkar 40199695: Project manager and backend developper : edwinach rc: 30 ri: 9 IC: 19.5
 <br/>
 
 ## Features
