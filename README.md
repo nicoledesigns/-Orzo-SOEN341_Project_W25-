@@ -10,7 +10,7 @@ Karan Kumar 40277342: Backend developper github : zekaran30 rc:
 <br/>
 Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel rc:
 <br/>
-Houda Filali 40276607: Frontend developper : houda-filali rc: 100
+Houda Filali 40276607: Frontend developper : houda-filali rc: 100 ri: 100 IC:100
 <br/>
 Nicole 40284018: Designer and Frontend developer, github : nicoledesigns rc:
 <br/>
