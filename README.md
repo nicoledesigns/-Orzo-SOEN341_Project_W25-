@@ -8,7 +8,7 @@ Yassine Abdellatif 40279279: Backend developper : HanmaTyson rc:
 <br/>
 Karan Kumar 40277342: Backend developper github : zekaran30 rc:
 <br/>
-Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel rc:
+Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel rc: 100 ri: 100 IC:100
 <br/>
 Houda Filali 40276607: Frontend developper : houda-filali rc: 100 ri: 100 IC:100
 <br/>
