@@ -4,9 +4,9 @@ In today's digital world, finding a platform that facilitates both team collabor
 
 # Roles
 
-Yassine Abdellatif 40279279: Backend developper : HanmaTyson rc:
+Yassine Abdellatif 40279279: Backend developper github : HanmaTyson rc: 87.06 ri:100 IC: 93.53
 <br/>
-Karan Kumar 40277342: Backend developper github : zekaran30 rc:
+Karan Kumar 40277342: Backend developper github : zekaran30 rc: 87.06 ri:100 IC: 93.53
 <br/>
 Eesha: 40189246: Designer and frontend developper : Eesha3101,EeshaP4tel rc: 100 ri: 100 IC:100
 <br/>
